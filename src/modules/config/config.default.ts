@@ -11,6 +11,10 @@ export const DEFAULT_CONFIG: ConfigData = {
     name: process.env.DATABASE_NAME!,
     url: process.env.DATABASE_URL!,
   },
+  redis: {
+    host: process.env.REDIS_HOST!,
+    port: Number(process.env.REDIS_PORT),
+  },
   auth: {
     expiresIn: 30000,
     access_token_secret: '',
@@ -31,4 +35,7 @@ export const DEFAULT_CONFIG: ConfigData = {
     password: '',
   },
   logLevel: '',
+  polls: {
+    duration: Number(process.env.POLL_DURATION),
+  },
 };

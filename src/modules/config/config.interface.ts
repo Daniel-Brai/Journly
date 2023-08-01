@@ -7,6 +7,11 @@ export interface ConfigDatabase {
   url: string;
 }
 
+export interface ConfigRedis {
+  host: string;
+  port: number;
+}
+
 export interface ConfigSwagger {
   username: string;
   password: string;
@@ -40,6 +45,10 @@ export interface UserServiceConfigOptions {
   port: number;
 }
 
+export interface PollsConfig {
+  duration: number;
+}
+
 export interface ConfigData {
   env: string;
 
@@ -47,9 +56,13 @@ export interface ConfigData {
 
   database: ConfigDatabase;
 
+  redis: ConfigRedis;
+
   swagger: ConfigSwagger;
 
   logLevel: string;
+
+  polls: PollsConfig;
 
   auth: AuthConfig;
 

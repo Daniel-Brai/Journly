@@ -9,12 +9,12 @@ export class CreatePollDto {
   @Min(1)
   @IsInt()
   @IsDefined()
-  public readonly votes_per_voter: number;
+  public readonly votes_per_participant: number;
 
   @Length(1, 255)
   @IsString()
   @IsDefined()
-  public readonly voter_name: string;
+  public readonly participant_name: string;
 }
 
 export class JoinPollDto {

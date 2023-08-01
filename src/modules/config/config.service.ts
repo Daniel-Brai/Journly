@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DEFAULT_CONFIG } from './config.default';
-import { ConfigData, ConfigDatabase, ConfigSwagger } from './config.interface';
+import { ConfigData, ConfigDatabase, ConfigRedis, ConfigSwagger } from './config.interface';
 
 @Injectable()
 export class ConfigService {
@@ -18,8 +18,12 @@ export class ConfigService {
       env: env.NODE_ENV || DEFAULT_CONFIG.env,
       port: parseInt(env.PORT!, 10),
       database: this.parseDBConfig(env, DEFAULT_CONFIG.database),
+      redis: this.parseRedisConfig(env, DEFAULT_CONFIG.redis),
       swagger: this.parseSwaggerConfig(env, DEFAULT_CONFIG.swagger),
       logLevel: env.LOG_LEVEL!,
+      polls: {
+        duration: Number(env.POLL_DURATION),
+      },
       auth: {
         expiresIn: Number(env.TOKEN_EXPIRY),
         access_token_secret: env.JWT_ACCESS_TOKEN_SECRET!,
@@ -49,6 +53,17 @@ export class ConfigService {
       password: env.DATABASE_PASSWORD || defaultConfig.password,
       name: env.DATABASE_NAME || defaultConfig.name,
       url: env.DATABASE_URL || defaultConfig.url,
+    };
+  }
+
+
+  private parseRedisConfig(
+    env: NodeJS.ProcessEnv,
+    defaultConfig: Readonly<ConfigRedis>,
+  ) {
+    return {
+      host: env.REDIS_HOST || defaultConfig.host,
+      port: Number(env.REDIS_PORT) || defaultConfig.port,
     };
   }
 

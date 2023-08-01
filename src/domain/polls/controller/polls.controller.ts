@@ -1,4 +1,4 @@
 import { Controller, Get, Post, Patch, Delete } from '@nestjs/common';
 
-@Controller('polls')
+@Controller('api/v1/polls')
 export class PollsController {}
