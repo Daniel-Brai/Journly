@@ -7,4 +7,3 @@ export interface SwaggerConfig {
   version: string;
   tags: string[];
 }
-

@@ -1,16 +1,16 @@
-import { Injectable, LoggerService } from "@nestjs/common";
-import moment from "moment";
-import * as winston from "winston";
+import { Injectable, LoggerService } from '@nestjs/common';
+import moment from 'moment';
+import * as winston from 'winston';
 
-import { isLogLevel, LogLevel } from "./logger.level";
+import { isLogLevel, LogLevel } from './logger.level';
 
 const formatter = winston.format((info) => {
   if (info.level === LogLevel.HTTP) {
     // HTTP messages are already formatted by the middleware, so just pass through
     return info;
   }
-  if (process.env.NODE_ENV !== "test") {
-    info.message = `[${moment().format("ddd MMM DD HH:mm:ss YYYY")}] [${
+  if (process.env.NODE_ENV !== 'test') {
+    info.message = `[${moment().format('ddd MMM DD HH:mm:ss YYYY')}] [${
       info.level
     }] ${info.message}`;
   }
@@ -26,14 +26,14 @@ export class Logger implements LoggerService {
 
   constructor() {
     this.logger = winston.createLogger({
-      level: "info",
+      level: 'info',
       format: formatter(),
     });
     this.logger.add(
       new winston.transports.Console({
         format: winston.format.json(),
         stderrLevels: [LogLevel.Error, LogLevel.Warn],
-      })
+      }),
     );
   }
 
@@ -117,4 +117,3 @@ export class Logger implements LoggerService {
     this.log(LogLevel.Silly, message);
   }
 }
-

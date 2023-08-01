@@ -1,22 +1,22 @@
-import { INestApplication } from "@nestjs/common";
-import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import * as basicAuth from "express-basic-auth";
-import { ConfigService } from "@modules/config";
-import { SWAGGER_CONFIG } from "./swagger.config";
+import { INestApplication } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as basicAuth from 'express-basic-auth';
+import { ConfigService } from '@modules/config';
+import { SWAGGER_CONFIG } from './swagger.config';
 
 /**
  * Creates an OpenAPI document for an application, via swagger.
  * @param app the nestjs application
  * @returns the OpenAPI document
  */
-const SWAGGER_ENVS = ["local", "development", "production"];
+const SWAGGER_ENVS = ['local', 'development', 'production'];
 
 export function createDocument(app: INestApplication) {
   const builder = new DocumentBuilder()
     .setTitle(SWAGGER_CONFIG.title)
     .addBearerAuth(
-      { type: "http", scheme: "bearer", bearerFormat: "JWT" },
-      "authorization"
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'authorization',
     )
     .setDescription(SWAGGER_CONFIG.description)
     .setVersion(SWAGGER_CONFIG.version);
@@ -28,16 +28,15 @@ export function createDocument(app: INestApplication) {
   const { username, password }: any = app.get(ConfigService).get().swagger;
   if (SWAGGER_ENVS.includes(env)) {
     app.use(
-      "/docs",
+      '/docs',
       basicAuth({
         challenge: true,
         users: {
           [username]: password,
         },
-      })
+      }),
     );
     const document = SwaggerModule.createDocument(app, options);
-    SwaggerModule.setup("docs", app, document);
+    SwaggerModule.setup('docs', app, document);
   }
 }
-

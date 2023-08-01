@@ -46,7 +46,7 @@ export class ConfigService {
       host: env.DATABASE_HOST || defaultConfig.host,
       port: Number(env.DATABASE_PORT) || defaultConfig.port,
       username: env.DATABASE_USERNAME || defaultConfig.username,
-      password: env.DATABASE_PASSWORD ||defaultConfig.password,
+      password: env.DATABASE_PASSWORD || defaultConfig.password,
       name: env.DATABASE_NAME || defaultConfig.name,
       url: env.DATABASE_URL || defaultConfig.url,
     };

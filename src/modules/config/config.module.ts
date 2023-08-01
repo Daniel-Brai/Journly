@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigService } from "./config.service";
+import { ConfigService } from './config.service';
 
 const ConfigFactory = {
   provide: ConfigService,

@@ -1,6 +1,6 @@
-import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
-import { UserRoles } from "@modules/types";
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { UserRoles } from '@modules/types';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -8,7 +8,7 @@ export class RolesGuard implements CanActivate {
 
   public async canActivate(context: ExecutionContext): Promise<boolean> {
     const roles =
-      this.reflector.getAllAndMerge<UserRoles[]>("roles", [
+      this.reflector.getAllAndMerge<UserRoles[]>('roles', [
         context.getClass(),
         context.getHandler(),
       ]) || [];
@@ -24,10 +24,9 @@ export class RolesGuard implements CanActivate {
     }
     const hasRole = () =>
       user.permissions
-        ?.split(",")
+        ?.split(',')
         .some((role: string) => roles.find((i) => i === role));
 
     return user && user.permissions && hasRole();
   }
 }
-

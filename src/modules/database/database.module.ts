@@ -1,17 +1,17 @@
-import { Module } from "@nestjs/common";
-import { DatabaseConfig } from "./database.interface";
-import { TypeOrmModule, TypeOrmModuleOptions } from "@nestjs/typeorm";
-import { ConfigModule, ConfigService, ConfigDatabase } from "@modules/config";
+import { Module } from '@nestjs/common';
+import { DatabaseConfig } from './database.interface';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService, ConfigDatabase } from '@modules/config';
 
 @Module({})
 export class DatabaseModule {
   private static getConnectionOptions(
     config: ConfigService,
-    dbConfig: DatabaseConfig
+    dbConfig: DatabaseConfig,
   ): TypeOrmModuleOptions {
     const dbData = config.get().database;
     if (!dbData) {
-      throw Error("");
+      throw Error('');
     }
     const connectionOptions = this.getConnectionOptionsPostgres(dbData);
     return {
@@ -23,19 +23,19 @@ export class DatabaseModule {
   }
 
   private static getConnectionOptionsPostgres(
-    dbData: ConfigDatabase
+    dbData: ConfigDatabase,
   ): TypeOrmModuleOptions {
     return {
-      type: "postgres",
+      type: 'postgres',
       host: dbData.host,
       port: dbData.port,
       username: dbData.username,
-      password: dbData.password,
+      password: `${dbData.password}`,
       database: dbData.name,
       // url: dbData.url,
       keepConnectionAlive: true,
       ssl:
-        process.env.NODE_ENV !== "local" && process.env.NODE_ENV !== "test"
+        process.env.NODE_ENV !== 'local' && process.env.NODE_ENV !== 'test'
           ? { rejectUnauthorized: false }
           : false,
     };
@@ -59,4 +59,3 @@ export class DatabaseModule {
     };
   }
 }
-

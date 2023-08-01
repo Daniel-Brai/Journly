@@ -1,5 +1,5 @@
-import { createParamDecorator, ExecutionContext } from "@nestjs/common";
-import { Request } from "express";
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { Request } from 'express';
 
 export interface UserMetaData {
   userId: string;
@@ -7,13 +7,13 @@ export interface UserMetaData {
   permissions: string;
 }
 
-export const User = createParamDecorator((_data: any, ctx: ExecutionContext) => {
-  const req = ctx.switchToHttp().getRequest<Request>();
-  // if route is protected, there is a user set in auth.middleware
-  if (req.user) {
-    return req.user;
-  }
-  return null;
-});
-
-
+export const User = createParamDecorator(
+  (_data: any, ctx: ExecutionContext) => {
+    const req = ctx.switchToHttp().getRequest<Request>();
+    // if route is protected, there is a user set in auth.middleware
+    if (req.user) {
+      return req.user;
+    }
+    return null;
+  },
+);

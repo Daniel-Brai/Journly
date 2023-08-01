@@ -1,5 +1,4 @@
-import { SetMetadata } from "@nestjs/common";
-import { UserRoles } from "@modules/types";
+import { SetMetadata } from '@nestjs/common';
+import { UserRoles } from '@modules/types';
 
-export const RoleAllowed = (...role: UserRoles[]) => SetMetadata("roles", role);
-
+export const RoleAllowed = (...role: UserRoles[]) => SetMetadata('roles', role);
