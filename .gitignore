@@ -1,5 +1,5 @@
 # compiled output
-/dist
+/apps/server
 /node_modules
 
 # Logs
@@ -10,6 +10,9 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+
+# Environments
+.env
 
 # OS
 .DS_Store
