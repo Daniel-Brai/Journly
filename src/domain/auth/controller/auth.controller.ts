@@ -1,24 +1,13 @@
-// Native.
 import { Request, Response } from "@nestjs/common";
-
-// Package.
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpStatus,
-  Param,
-  Patch,
-  Post,
-  Put,
-  Query,
   Req,
-  Res,
+  Post,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
 } from "@nestjs/common";
 import {
   ApiBadRequestResponse,
@@ -29,8 +18,6 @@ import {
   ApiOperation,
   ApiTags,
 } from "@nestjs/swagger";
-import { Logger } from "@modules/logger";
-import { UserRoles } from "@modules/types";
 import { AuthService } from "../services/auth.service";
 import { UserSignInDto } from "../dto/auth-request.dto";
 import { UserSignInResponseDto } from "../dto/auth-response.dto";
@@ -46,7 +33,6 @@ import { GithubOauthGuard } from "../guards/github-auth.guard";
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly logger: Logger
   ) {}
 
 
@@ -94,6 +80,7 @@ export class AuthController {
     });
     return res.send();
   }
+
   @UseGuards(RefreshTokenGuard)
   @HttpCode(HttpStatus.OK)
   @ApiConsumes("application/json")
@@ -103,15 +90,15 @@ export class AuthController {
     return await this.authService.refreshToken(user);
   }
 
+  @UseGuards(GoogleOauthGuard)
+  @HttpCode(HttpStatus.OK)
   @Get('social/google/login')
-  @UseGuards(GoogleOauthGuard)
-  async googleAuth(@Req() _req: any) {
-    //
-  }
+  public async googleAuth(@Req() _req: any) {}
 
-  @Get("social/google/callback")
   @UseGuards(GoogleOauthGuard)
-  async googleAuthRedirect(@Request() req: any, @Response() res: any) {
+  @HttpCode(HttpStatus.OK)
+  @Get("social/google/callback")
+  public async googleAuthRedirect(@Request() req: any, @Response() res: any) {
     const response = await this.authService.createSocialAuthToken(req.user);
     res.cookie("access_token", response.access_token, {
       httpOnly: true,
@@ -124,15 +111,15 @@ export class AuthController {
     return res.redirect('/');
   }
 
+  @UseGuards(GithubOauthGuard)
+  @HttpCode(HttpStatus.OK)
   @Get('social/github/login')
-  @UseGuards(GithubOauthGuard)
-  async githubAuth(@Req() _req: any) {
-    //
-  }
+  public async githubAuth(@Req() _req: any) {}
 
-  @Get("social/github/callback")
   @UseGuards(GithubOauthGuard)
-  async githubAuthRedirect(@Request() req: any, @Response() res: any) {
+  @HttpCode(HttpStatus.OK)
+  @Get("social/github/callback")
+  public async githubAuthRedirect(@Request() req: any, @Response() res: any) {
     const response = await this.authService.createSocialAuthToken(req.user);
     res.cookie("access_token", response.access_token, {
       httpOnly: true,

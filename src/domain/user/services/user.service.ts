@@ -20,12 +20,12 @@ export class UserService {
   constructor(
     private readonly logger: Logger,
     private readonly authService: AuthService,
-    @InjectRepository(UserEntity) private userRepo: Repository<UserEntity>,
-    private configService: ConfigService
+    private configService: ConfigService,
+    @InjectRepository(UserEntity) private userRepository: Repository<UserEntity>,
   ) {}
 
   async getAllUsers() {
-    return this.userRepo.find({});
+    return this.userRepository.find({});
   }
 
   async update(
@@ -66,7 +66,7 @@ export class UserService {
     if (Object.entries(fieldToUpdate).length > 0) {
       user = await this.findOneByEmail(email.toLowerCase());
       const saveEntity = { ...user, ...fieldToUpdate };
-      await this.userRepo.save(saveEntity);
+      await this.userRepository.save(saveEntity);
     }
     // return updated user
     user = await this.findOneByEmail(email);
@@ -74,7 +74,7 @@ export class UserService {
   }
 
   async findOneByUserId(id: string): Promise<UserEntity | null> {
-    return this.userRepo.findOne({
+    return this.userRepository.findOne({
       where: {
         id,
       },
@@ -84,20 +84,21 @@ export class UserService {
   hashData(token: string) {
     return bcrypt.hash(token, 10);
   }
+
   async updateRefreshTokenByEmail(email: string, refToken: string) {
     if (!refToken) {
       const user = await this.findOneByEmail(email.toLowerCase());
       const saveEntity = { ...user, refresh_token: null };
-      return await this.userRepo.save(saveEntity);
+      return await this.userRepository.save(saveEntity);
     }
     const hashedToken = await this.hashData(refToken);
     const user = await this.findOneByEmail(email.toLowerCase());
     const saveEntity = { ...user, refresh_token: hashedToken };
-    return await this.userRepo.save(saveEntity);
+    return await this.userRepository.save(saveEntity);
   }
 
   async findOneByEmail(email: string): Promise<UserEntity | null> {
-    return this.userRepo.findOne({
+    return this.userRepository.findOne({
       where: {
         email,
       },
@@ -106,7 +107,7 @@ export class UserService {
 
   async findUserByProperty(data: FindUserDto) {
     const { email, first_name, last_name, name } = data;
-    const users = await this.userRepo.find({
+    const users = await this.userRepository.find({
       where: [
         { name: Like(`%${name}%`) },
         { email: Like(`%${email}%`) },
@@ -122,7 +123,7 @@ export class UserService {
     payload: UpdateUserPermissionBodyDto
   ) {
     const { id } = param;
-    const user = await this.userRepo.findOne({
+    const user = await this.userRepository.findOne({
       where: {
         id,
       },
@@ -135,7 +136,7 @@ export class UserService {
   }
 
   async create(userInput: UserSignupDto): Promise<UserEntity> {
-    const userEntity = this.userRepo.create();
+    const userEntity = this.userRepository.create();
     const { email } = userInput;
     const existingUser = await this.findOneByEmail(email.toLowerCase());
     if (existingUser) {
@@ -154,7 +155,7 @@ export class UserService {
 
     let user: UserEntity | null;
     try {
-      user = await this.userRepo.save(saveEntity);
+      user = await this.userRepository.save(saveEntity);
       this.logger.log(`user created successfully ${JSON.stringify(user)}`);
       return user;
     } catch (err) {
@@ -162,6 +163,7 @@ export class UserService {
       throw new ConflictException(`user already exist with same email`);
     }
   }
+
   async hashPassword(password: string) {
     return await bcrypt.hash(password, 10);
   }
