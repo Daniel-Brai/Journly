@@ -9,9 +9,8 @@ export class PollsProvider {
   private readonly logger = new Logger(PollsProvider.name);
 
   constructor( 
-    configService: ConfigService,
-    @Inject(IOREDIS)
-    private readonly redisClient: Redis,
+    private readonly configService: ConfigService,
+    @Inject(IOREDIS) private readonly redisClient: Redis,
   ) {
     this.ttl = `${configService.get().polls.duration}`;
   }

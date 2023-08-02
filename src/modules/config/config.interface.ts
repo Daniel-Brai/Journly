@@ -40,6 +40,12 @@ export interface GoogleConfig {
   oauth_google_secret: string;
 }
 
+export interface CloudinaryConfig {
+  cloud_name: string;
+  cloud_api_key: string;
+  cloud_secret_key: string;
+}
+
 export interface UserServiceConfigOptions {
   host: string;
   port: number;
@@ -63,6 +69,8 @@ export interface ConfigData {
   logLevel: string;
 
   polls: PollsConfig;
+
+  cloudinary: CloudinaryConfig;
 
   auth: AuthConfig;
 

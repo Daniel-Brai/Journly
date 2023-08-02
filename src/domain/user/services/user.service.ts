@@ -164,6 +164,18 @@ export class UserService {
     }
   }
 
+  async deleteUser(id: string) {
+    let user: UserEntity | null;
+    try {
+      user = await this.findOneByUserId(id);
+      await this.userRepository.delete({ id: user.id });
+      this.logger.log(`user with id ${user.id} deleted successfully`);
+    } catch (err) {
+      this.logger.error(err);
+      throw new NotFoundException();
+    }
+  }
+
   async hashPassword(password: string) {
     return await bcrypt.hash(password, 10);
   }

@@ -62,6 +62,7 @@ export class UpdateUserByIdDto {
   })
   @IsUUID()
   public id!: string;
+
 }
 
 export class UpdateUserPermissionBodyDto {
@@ -129,5 +130,13 @@ export class fieldsToUpdateDto extends PartialType(UserSignupDto) {
   @ValidateNested()
   @validateType(() => BothPassword)
   public password_update!: BothPassword;
+  
+  @ApiProperty({
+    description: "user profile photo url",
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  public profile_photo_url!: string; 
 }
 

@@ -1,5 +1,5 @@
 import { Injectable, LoggerService } from '@nestjs/common';
-import moment from 'moment';
+import * as moment from 'moment';
 import * as winston from 'winston';
 
 import { isLogLevel, LogLevel } from './logger.level';

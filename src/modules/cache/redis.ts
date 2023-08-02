@@ -9,18 +9,18 @@ export const RedisTransportModule = RedisModule.registerAsync({
 
     return {
       connectionOptions: {
-        host: configService.get().redis.host,
-        port: configService.get().redis.port,
+        host: `${configService.get().redis.host}`,
+        port: Number(`${configService.get().redis.port}`),
       },
       onClientReady: (client) => {
-        logger.log('Redis CLient initialized...');
+        logger.log('Redis Client initialized...');
 
         client.on('error', (err) => {
           logger.error(`Redis Client initialization failed: ${err.message}`);
         });
 
         client.on('connect', () => {
-          logger.log(`Redis Client initializion successful on ${client.options.host}:${client.options.port}...`);
+          logger.log(`Redis Client initialization successful on ${client.options.host}:${client.options.port}...`);
         });
       },
     };

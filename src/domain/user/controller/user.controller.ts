@@ -9,13 +9,17 @@ import {
   Post,
   Put,
   UseGuards,
+  UploadedFile, 
+  UseInterceptors,
 } from "@nestjs/common";
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiConsumes,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -23,6 +27,7 @@ import {
   ApiUnprocessableEntityResponse,
 } from "@nestjs/swagger";
 import { Logger } from "@modules/logger";
+import { CloudinaryService } from "@modules/cloudinary";
 import { UserRoles } from "@modules/types";
 import { AccessTokenGuard } from "../../auth/guards/access-token.guard";
 import { RoleAllowed } from "../../auth/decorators/roles.decorator";
@@ -51,48 +56,57 @@ import {
 @ApiTags("Users")
 export class UserController {
   constructor(
-    private readonly service: UserService,
+    private readonly userService: UserService,
+    private cloudinaryService: CloudinaryService,
     private readonly logger: Logger
   ) {}
 
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({
     type: UserSignupResponseDto,
-    description: "user created successfully",
+    description: "User created successfully",
   })
   @ApiOkResponse({ type: UserSignupResponseDto, description: "" })
-  @ApiOperation({ description: "user create api " })
+  @ApiOperation({ description: "User create api " })
   @ApiConsumes("application/json")
   @Post("")
   public async CreateUser(@Body() body: UserSignupDto) {
     this.logger.info(JSON.stringify(body));
-    return this.service.create(body);
+    return this.userService.create(body);
   }
 
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({
     type: UserSignupResponseDto,
-    description: "user updated successfully",
+    description: "User updated successfully",
   })
   @ApiOkResponse({ type: UserSignupResponseDto, description: "" })
-  @ApiOperation({ description: "user update api " })
+  @ApiOperation({ description: "User update api " })
   @ApiConsumes("application/json")
+  @UseInterceptors(FileInterceptor('file'))
   @Put("/:id")
-  public async UpdateUser(@Body() body: fieldsToUpdateDto) {
-    return this.service.update(body.email, body);
+  public async UpdateUser(
+    @Body() body: fieldsToUpdateDto, 
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    if (file != null) {
+      const { secure_url } = await this.cloudinaryService.uploadFile(file);
+      body.profile_photo_url = secure_url;
+    }
+    return this.userService.update(body.email, body);
   }
 
   @UseGuards(AccessTokenGuard, RolesGuard)
   @RoleAllowed(UserRoles["system-admin"])
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: UserSignupResponseDto, description: "" })
-  @ApiOperation({ description: "find users based on props " })
+  @ApiOperation({ description: "Find Users based on props " })
   @ApiConsumes("application/json")
   @Get("/search")
   public async findUser(@Param() param: FindUserDto) {
     this.logger.info(JSON.stringify(param));
-    return this.service.findUserByProperty(param);
+    return this.userService.findUserByProperty(param);
   }
 
   @UseGuards(AccessTokenGuard, RolesGuard)
@@ -104,10 +118,10 @@ export class UserController {
   @ApiInternalServerErrorResponse({ description: INTERNAL_SERVER_ERROR })
   @ApiOkResponse({ description: "assign permissions" })
   @ApiOperation({
-    description: "assign permission to user",
+    description: "Assign Permission to User",
   })
   @ApiOkResponse({
-    description: "assign permissions to the user",
+    description: "Assign Permissions to a User",
   })
   @ApiConsumes("application/json")
   @Put("/assign-permissions/:id")
@@ -115,7 +129,7 @@ export class UserController {
     @Param() param: UpdateUserByIdDto,
     @Body() payload: UpdateUserPermissionBodyDto
   ) {
-    return this.service.assignUserPermissions(param, payload);
+    return this.userService.assignUserPermissions(param, payload);
   }
 
   @UseGuards(AccessTokenGuard, RolesGuard)
@@ -125,7 +139,7 @@ export class UserController {
   @ApiForbiddenResponse({ description: UNAUTHORIZED_REQUEST })
   @ApiUnprocessableEntityResponse({ description: BAD_REQUEST })
   @ApiInternalServerErrorResponse({ description: INTERNAL_SERVER_ERROR })
-  @ApiOkResponse({ description: "users returned successfully" })
+  @ApiOkResponse({ description: "Users returned successfully" })
   @ApiOperation({
     description: "Get all Users",
   })
@@ -135,10 +149,28 @@ export class UserController {
   @ApiConsumes("application/json")
   @Get("/")
   public async allUsers() {
-    return this.service.getAllUsers();
+    return this.userService.getAllUsers();
   }
 
-  public async DeleteUser() {}
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @RoleAllowed(UserRoles["system-admin"])
+  @ApiConsumes("application/json")
+  @ApiNotFoundResponse({ description: NO_ENTITY_FOUND })
+  @ApiNoContentResponse({ description: "" })
+  @ApiForbiddenResponse({ description: UNAUTHORIZED_REQUEST })
+  @ApiUnprocessableEntityResponse({ description: BAD_REQUEST })
+  @ApiInternalServerErrorResponse({ description: INTERNAL_SERVER_ERROR })
+  @ApiOkResponse({ description: "User removed successfully" })
+  @ApiOperation({
+    description: "Delete a User",
+  })
+  @ApiOkResponse({
+    description: "Returns no content",
+  })
+  @Delete('/delete/:id')
+  public async deleteUser(@Param() id: string) {
+    return this.userService.deleteUser(id);
+  }
 
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.OK)
@@ -147,12 +179,12 @@ export class UserController {
   @ApiForbiddenResponse({ description: UNAUTHORIZED_REQUEST })
   @ApiUnprocessableEntityResponse({ description: BAD_REQUEST })
   @ApiInternalServerErrorResponse({ description: INTERNAL_SERVER_ERROR })
-  @ApiOkResponse({ description: "user returned successfully" })
+  @ApiOkResponse({ description: "User returned successfully" })
   @ApiOperation({
-    description: "get current session User",
+    description: "Get Current Session User",
   })
   @ApiOkResponse({
-    description: "return session user details",
+    description: "Returns Session User details",
   })
   @Get("/profile")
   public async getUserProfile(@User() user: UserEntity) {
@@ -160,22 +192,41 @@ export class UserController {
   }
 
   @UseGuards(AccessTokenGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @ApiConsumes("application/json")
   @ApiNotFoundResponse({ description: NO_ENTITY_FOUND })
   @ApiForbiddenResponse({ description: UNAUTHORIZED_REQUEST })
   @ApiUnprocessableEntityResponse({ description: BAD_REQUEST })
   @ApiInternalServerErrorResponse({ description: INTERNAL_SERVER_ERROR })
-  @ApiOkResponse({ description: "user returned successfully" })
+  @ApiOkResponse({ description: "User returned successfully" })
   @ApiOperation({
-    description: "delete current session User",
+    description: "Update Current Session User's Profile",
   })
   @ApiOkResponse({
-    description: "return no content",
+    description: "Returns Updated Session User details",
+  })
+  @Put("/profile")
+  public async updateUserProfile(@User() user: UserEntity) {
+    return user;
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiConsumes("application/json")
+  @ApiNotFoundResponse({ description: NO_ENTITY_FOUND })
+  @ApiNoContentResponse({ description: "" })
+  @ApiForbiddenResponse({ description: UNAUTHORIZED_REQUEST })
+  @ApiUnprocessableEntityResponse({ description: BAD_REQUEST })
+  @ApiInternalServerErrorResponse({ description: INTERNAL_SERVER_ERROR })
+  @ApiOperation({
+    description: "Delete Current Session User Profile",
+  })
+  @ApiOkResponse({
+    description: "Returns no content",
   })
   @Delete("/profile/delete")
-  public async deleteUserAccount(@User() user: UserEntity) {
-    return user;
+  public async deleteUserProfile(@User() user: UserEntity) {
+    return this.userService.deleteUser(user.id);
   }
 }
 

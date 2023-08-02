@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response } from 'express';
-import moment from 'moment';
+import * as moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from './logger';
 

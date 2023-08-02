@@ -1,19 +1,19 @@
 import { ConfigData } from './config.interface';
 
 export const DEFAULT_CONFIG: ConfigData = {
-  port: Number(process.env.PORT || 8001),
+  port: Number(process.env.PORT || 8000),
   env: 'production',
   database: {
-    host: process.env.DATABASE_HOST!,
-    port: Number(process.env.DATABASE_PORT),
-    username: process.env.DATABASE_USERNAME!,
-    password: process.env.DATABASE_PASSWORD!,
-    name: process.env.DATABASE_NAME!,
-    url: process.env.DATABASE_URL!,
+    host: '',
+    port: 5432,
+    username: '',
+    password: '',
+    name: '',
+    url: '',
   },
   redis: {
-    host: process.env.REDIS_HOST!,
-    port: Number(process.env.REDIS_PORT),
+    host: '',
+    port: 6379,
   },
   auth: {
     expiresIn: 30000,
@@ -31,11 +31,16 @@ export const DEFAULT_CONFIG: ConfigData = {
     oauth_github_secret: '',
   },
   swagger: {
-    username: '',
-    password: '',
+    username: 'Daniel_Brai',
+    password: 'GenericPassword!123',
   },
   logLevel: '',
+  cloudinary: {
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+    cloud_api_key: process.env.CLOUDINARY_API_KEY!,
+    cloud_secret_key: process.env.CLOUDINARY_API_SECRET_KEY!,
+  },
   polls: {
-    duration: Number(process.env.POLL_DURATION),
+    duration: 30000,
   },
 };

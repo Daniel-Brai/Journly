@@ -16,6 +16,10 @@ async function bootstrap() {
   const logger = app.get(Logger);
   const reflector = app.get(Reflector);
 
+  app.enableCors({
+    origin: ['https://localhost:8001', 'http://localhost:8001']
+  });
+
   const PORT = configService.get().port;
 
   app.setViewEngine('hbs');

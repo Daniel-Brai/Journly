@@ -30,7 +30,7 @@ export class DatabaseModule {
       host: dbData.host,
       port: dbData.port,
       username: dbData.username,
-      password: `${dbData.password}`,
+      password: dbData.password,
       database: dbData.name,
       // url: dbData.url,
       keepConnectionAlive: true,
