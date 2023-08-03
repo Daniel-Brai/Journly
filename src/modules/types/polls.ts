@@ -7,7 +7,7 @@ export interface Poll {
   admin_id: string;
   poll_topic: string;
   votes_per_participant: number;
-  participants: Participants,
+  participants: Participants;
 }
 
 export interface CreatePoll {
@@ -26,4 +26,3 @@ export interface RejoinPoll {
   readonly participant_id: string;
   readonly participant_name: string;
 }
-

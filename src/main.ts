@@ -5,7 +5,7 @@ import { ConfigService } from '@modules/config';
 import { Logger } from '@modules/logger';
 import { AppModule } from './app.module';
 import { createDocument } from './docs/main';
-import { join } from "path";
+import { join } from 'path';
 import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
@@ -17,7 +17,7 @@ async function bootstrap() {
   const reflector = app.get(Reflector);
 
   app.enableCors({
-    origin: ['https://localhost:8001', 'http://localhost:8001']
+    origin: ['https://localhost:8001', 'http://localhost:8001'],
   });
 
   const PORT = configService.get().port;

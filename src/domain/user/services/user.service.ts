@@ -1,19 +1,22 @@
-import { ConflictException, NotFoundException, Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { ConfigService } from "@modules/config";
-import { Logger } from "@modules/logger";
-import { Like, Repository } from "typeorm";
-import * as bcrypt from "bcrypt";
+import {
+  ConflictException,
+  NotFoundException,
+  Injectable,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@modules/config';
+import { Logger } from '@modules/logger';
+import { Like, Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import {
   fieldsToUpdateDto,
   FindUserDto,
   UpdateUserByIdDto,
   UpdateUserPermissionBodyDto,
   UserSignupDto,
-} from "../dto/user-request.dto";
-import { UserEntity } from "../entity/user.entity";
-import { AuthService } from "../../auth/services/auth.service";
-
+} from '../dto/user-request.dto';
+import { UserEntity } from '../entity/user.entity';
+import { AuthService } from '../../auth/services/auth.service';
 
 @Injectable()
 export class UserService {
@@ -21,7 +24,8 @@ export class UserService {
     private readonly logger: Logger,
     private readonly authService: AuthService,
     private configService: ConfigService,
-    @InjectRepository(UserEntity) private userRepository: Repository<UserEntity>,
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
   ) {}
 
   async getAllUsers() {
@@ -30,7 +34,7 @@ export class UserService {
 
   async update(
     email: string,
-    fields: fieldsToUpdateDto
+    fields: fieldsToUpdateDto,
   ): Promise<UserEntity | undefined> {
     // check what all use is asking to update
     if (fields.email) {
@@ -120,7 +124,7 @@ export class UserService {
 
   async assignUserPermissions(
     param: UpdateUserByIdDto,
-    payload: UpdateUserPermissionBodyDto
+    payload: UpdateUserPermissionBodyDto,
   ) {
     const { id } = param;
     const user = await this.userRepository.findOne({
@@ -140,7 +144,7 @@ export class UserService {
     const { email } = userInput;
     const existingUser = await this.findOneByEmail(email.toLowerCase());
     if (existingUser) {
-      throw new ConflictException("user with email already exists");
+      throw new ConflictException('user with email already exists');
     }
     const pass = await this.hashPassword(userInput.password);
 
@@ -180,4 +184,3 @@ export class UserService {
     return await bcrypt.hash(password, 10);
   }
 }
-

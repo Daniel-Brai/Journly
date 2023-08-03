@@ -1,8 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { DEFAULT_CONFIG } from './config.default';
-import { ConfigData, ConfigDatabase, ConfigRedis, ConfigSwagger } from './config.interface';
+import {
+  ConfigData,
+  ConfigDatabase,
+  ConfigRedis,
+  ConfigSwagger,
+} from './config.interface';
 import { config } from 'dotenv';
 
+// auto load envs into config service
 config();
 
 @Injectable()
@@ -63,7 +69,6 @@ export class ConfigService {
       url: env.DATABASE_URL! || defaultConfig.url,
     };
   }
-
 
   private parseRedisConfig(
     env: NodeJS.ProcessEnv,

@@ -1,2 +1,2 @@
-export * from "./redis.module";
-export * from "./redis";
+export * from './redis.module';
+export * from './redis';

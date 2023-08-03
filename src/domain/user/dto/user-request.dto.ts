@@ -1,4 +1,4 @@
-import { ApiProperty, PartialType } from "@nestjs/swagger";
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import {
   IsDefined,
   IsEmail,
@@ -9,15 +9,14 @@ import {
   IsUUID,
   MinLength,
   ValidateNested,
-} from "class-validator";
-import { Type as validateType } from "class-transformer";
-import { UserRoles } from "@modules/types";
-
+} from 'class-validator';
+import { Type as validateType } from 'class-transformer';
+import { UserRoles } from '@modules/types';
 
 export class UserSignupDto {
   @ApiProperty({
-    description: "THe email of the user",
-    example: "example@email.com",
+    description: 'THe email of the user',
+    example: 'example@email.com',
     required: true,
   })
   @IsDefined()
@@ -26,8 +25,8 @@ export class UserSignupDto {
   public email!: string;
 
   @ApiProperty({
-    description: "The first name of the user",
-    example: "Daniel",
+    description: 'The first name of the user',
+    example: 'Daniel',
     required: false,
   })
   @IsOptional()
@@ -35,8 +34,8 @@ export class UserSignupDto {
   public first_name!: string;
 
   @ApiProperty({
-    description: "THe last name of the user",
-    example: "Brai",
+    description: 'THe last name of the user',
+    example: 'Brai',
     required: false,
   })
   @IsOptional()
@@ -44,8 +43,8 @@ export class UserSignupDto {
   public last_name!: string;
 
   @ApiProperty({
-    description: "password",
-    example: "34535SDF353@#22342",
+    description: 'password',
+    example: '34535SDF353@#22342',
     required: true,
   })
   @IsDefined()
@@ -56,19 +55,18 @@ export class UserSignupDto {
 
 export class UpdateUserByIdDto {
   @ApiProperty({
-    description: "uuid user_id",
-    example: "",
+    description: 'uuid user_id',
+    example: '',
     required: true,
   })
   @IsUUID()
   public id!: string;
-
 }
 
 export class UpdateUserPermissionBodyDto {
   @ApiProperty({
-    description: "uuid user_id",
-    example: "",
+    description: 'uuid user_id',
+    example: '',
     enum: UserRoles,
   })
   @IsEnum(UserRoles)
@@ -77,8 +75,8 @@ export class UpdateUserPermissionBodyDto {
 
 export class FindUserDto {
   @ApiProperty({
-    description: "The email of the user",
-    example: "example@email.com",
+    description: 'The email of the user',
+    example: 'example@email.com',
     required: false,
   })
   @IsOptional()
@@ -87,8 +85,8 @@ export class FindUserDto {
   public email!: string;
 
   @ApiProperty({
-    description: "The full name of the user",
-    example: "Daniel Brai",
+    description: 'The full name of the user',
+    example: 'Daniel Brai',
     required: false,
   })
   @IsOptional()
@@ -96,8 +94,8 @@ export class FindUserDto {
   public name!: string;
 
   @ApiProperty({
-    description: "The first name of the user",
-    example: "Daniel",
+    description: 'The first name of the user',
+    example: 'Daniel',
     required: false,
   })
   @IsOptional()
@@ -105,8 +103,8 @@ export class FindUserDto {
   public first_name!: string;
 
   @ApiProperty({
-    description: "The last name of the user",
-    example: "Brai",
+    description: 'The last name of the user',
+    example: 'Brai',
     required: false,
   })
   @IsOptional()
@@ -130,13 +128,12 @@ export class fieldsToUpdateDto extends PartialType(UserSignupDto) {
   @ValidateNested()
   @validateType(() => BothPassword)
   public password_update!: BothPassword;
-  
+
   @ApiProperty({
-    description: "user profile photo url",
-    required: false
+    description: 'user profile photo url',
+    required: false,
   })
   @IsOptional()
   @IsString()
-  public profile_photo_url!: string; 
+  public profile_photo_url!: string;
 }
-

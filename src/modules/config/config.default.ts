@@ -31,8 +31,8 @@ export const DEFAULT_CONFIG: ConfigData = {
     oauth_github_secret: '',
   },
   swagger: {
-    username: 'Daniel_Brai',
-    password: 'GenericPassword!123',
+    username: '',
+    password: '',
   },
   logLevel: '',
   cloudinary: {

@@ -1,14 +1,14 @@
-import { Injectable } from "@nestjs/common";
-import { PassportStrategy } from "@nestjs/passport";
-import { Profile, Strategy } from "passport-github";
-import { AuthService } from "../services/auth.service";
-import { ConfigService } from "@modules/config";
+import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { Profile, Strategy } from 'passport-github';
+import { AuthService } from '../services/auth.service';
+import { ConfigService } from '@modules/config';
 
 @Injectable()
-export class GithubOauthStrategy extends PassportStrategy(Strategy, "github") {
+export class GithubOauthStrategy extends PassportStrategy(Strategy, 'github') {
   constructor(
     private readonly authService: AuthService,
-    configService: ConfigService
+    configService: ConfigService,
   ) {
     super({
       clientID: `${configService.get().github.oauth_github_id}`,
@@ -21,11 +21,11 @@ export class GithubOauthStrategy extends PassportStrategy(Strategy, "github") {
   async validate(
     _accessToken: string,
     _refreshToken: string,
-    profile: Profile
+    profile: Profile,
   ) {
     const { id, name, emails } = profile;
     return {
-      provider: "github",
+      provider: 'github',
       providerId: id,
       uid: id,
       name: name.givenName,
@@ -34,4 +34,3 @@ export class GithubOauthStrategy extends PassportStrategy(Strategy, "github") {
     };
   }
 }
-

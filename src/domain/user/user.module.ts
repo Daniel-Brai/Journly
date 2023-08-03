@@ -1,13 +1,12 @@
-import { forwardRef, Module } from "@nestjs/common";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { ConfigModule } from "@modules/config";
-import { LoggerModule } from "@modules/logger";
+import { forwardRef, Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@modules/config';
+import { LoggerModule } from '@modules/logger';
 import { CloudinaryModule } from '@modules/cloudinary';
-import { AuthModule } from "../auth/auth.module";
-import { UserEntity } from "./entity/user.entity";
-import { UserController } from "./controller/user.controller";
-import { UserService } from "./services/user.service";
-
+import { AuthModule } from '../auth/auth.module';
+import { UserEntity } from './entity/user.entity';
+import { UserController } from './controller/user.controller';
+import { UserService } from './services/user.service';
 
 @Module({
   imports: [

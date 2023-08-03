@@ -4,18 +4,16 @@ import {
   Inject,
   Injectable,
   NotFoundException,
-} from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
-import { ConfigService } from "@modules/config";
-import { UserService } from "../../user/services/user.service";
-import { UserSignInDto } from "../dto/auth-request.dto";
-import * as bcrypt from "bcrypt";
-import { JwtPayload } from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
-import { UserEntity } from "../../user/entity/user.entity";
-import { UserSignupDto } from "../../user/dto/user-request.dto";
-
-
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@modules/config';
+import { UserService } from '../../user/services/user.service';
+import { UserSignInDto } from '../dto/auth-request.dto';
+import * as bcrypt from 'bcrypt';
+import { JwtPayload } from 'jsonwebtoken';
+import { v4 as uuidv4 } from 'uuid';
+import { UserEntity } from '../../user/entity/user.entity';
+import { UserSignupDto } from '../../user/dto/user-request.dto';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +21,7 @@ export class AuthService {
     @Inject(forwardRef(() => UserService))
     private readonly usersService: UserService,
     private readonly configService: ConfigService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
   ) {}
 
   async validateUserByPassword(payload: UserSignInDto) {
@@ -58,14 +56,14 @@ export class AuthService {
 
   public async refreshToken(user: UserEntity) {
     const { refresh_token, email } = user;
-    
+
     const userData = await this.usersService.findOneByEmail(email);
     if (!userData) {
       throw new ForbiddenException();
     }
     const isMatchFound = await bcrypt.compare(
       refresh_token,
-      userData.refresh_token
+      userData.refresh_token,
     );
     if (!isMatchFound) {
       throw new ForbiddenException();
@@ -74,22 +72,22 @@ export class AuthService {
     await this.updateRefreshToken(user.email, tokens.refresh_token);
     return tokens;
   }
-  
+
   public async createToken(user: UserEntity) {
     const data: JwtPayload = {
       userId: user.id,
       email: user.email,
       permissions: user.permissions,
     };
-    
+
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(data, {
         secret: this.configService.get().auth.access_token_secret,
-        expiresIn: "1d",
+        expiresIn: '1d',
       }),
       this.jwtService.signAsync(data, {
         secret: this.configService.get().auth.refresh_token_secret,
-        expiresIn: "1d",
+        expiresIn: '1d',
       }),
     ]);
 
@@ -99,7 +97,7 @@ export class AuthService {
       refresh_token: refreshToken,
     };
   }
-  
+
   public async createSocialAuthToken(user: any) {
     let savedUser = await this.usersService.findOneByEmail(user.email);
 
@@ -109,20 +107,20 @@ export class AuthService {
         password: uuidv4(),
       } as UserSignupDto);
     }
-    
+
     const data: JwtPayload = {
       userId: savedUser.id,
       email: savedUser.email,
     };
-    
+
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(data, {
         secret: this.configService.get().auth.access_token_secret,
-        expiresIn: "1d",
+        expiresIn: '1d',
       }),
       this.jwtService.signAsync(data, {
         secret: this.configService.get().auth.refresh_token_secret,
-        expiresIn: "1d",
+        expiresIn: '1d',
       }),
     ]);
 
@@ -141,4 +139,3 @@ export class AuthService {
     return await bcrypt.compare(enteredPassword, dbPassword);
   }
 }
-
