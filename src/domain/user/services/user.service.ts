@@ -17,6 +17,7 @@ import {
 } from '../dto/user-request.dto';
 import { UserEntity } from '../entity/user.entity';
 import { AuthService } from '../../auth/services/auth.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserService {
@@ -166,6 +167,15 @@ export class UserService {
       this.logger.error(err);
       throw new ConflictException(`user already exist with same email`);
     }
+  }
+
+  async invite(email: string) {
+    let userEntity = this.userRepository.create();
+    const password = uuidv4();
+    userEntity.email = email;
+    userEntity.password = await this.hashPassword(password);
+    const invitedUser = await this.create(userEntity);
+    this.logger.log(`user invitted successfully ${JSON.stringify(invitedUser)}`);
   }
 
   async deleteUser(id: string) {
