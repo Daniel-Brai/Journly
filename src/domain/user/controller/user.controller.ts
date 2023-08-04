@@ -89,7 +89,7 @@ export class UserController {
     @Body() body: fieldsToUpdateDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    if (file != null) {
+    if (file !== null && file !== undefined) {
       const { secure_url } = await this.cloudinaryService.uploadFile(file);
       body.profile_photo_url = secure_url;
     }

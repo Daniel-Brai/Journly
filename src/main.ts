@@ -1,8 +1,8 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { ClassSerializerInterceptor, ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@modules/config';
-import { Logger } from '@modules/logger';
+import { SocketIOAdapter } from '@modules/websockets';
 import { AppModule } from './app.module';
 import { createDocument } from './docs/main';
 import { join } from 'path';
@@ -16,11 +16,13 @@ async function bootstrap() {
   const logger = app.get(Logger);
   const reflector = app.get(Reflector);
 
+  const PORT = configService.get().port;
+
   app.enableCors({
-    origin: ['https://localhost:8001', 'http://localhost:8001'],
+    origin: [`http://localhost:${PORT}`],
   });
 
-  const PORT = configService.get().port;
+  app.useWebsocketAdapter(new SocketIOAdapter(app, configService));
 
   app.setViewEngine('hbs');
   app.useStaticAssets(join(__dirname, '../client/public/assets'));

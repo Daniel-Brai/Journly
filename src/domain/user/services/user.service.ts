@@ -86,6 +86,14 @@ export class UserService {
     });
   }
 
+  async findOneByUsername(name: string): Promise<UserEntity | null> {
+    return this.userRepository.findOne({
+      where: {
+        name: name,
+      },
+    });
+  }
+
   hashData(token: string) {
     return bcrypt.hash(token, 10);
   }
@@ -175,6 +183,7 @@ export class UserService {
     userEntity.email = email;
     userEntity.password = await this.hashPassword(password);
     const invitedUser = await this.create(userEntity);
+    // TODO: Send email here to the user
     this.logger.log(`user invitted successfully ${JSON.stringify(invitedUser)}`);
   }
 

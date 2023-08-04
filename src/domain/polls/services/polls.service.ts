@@ -12,6 +12,7 @@ import { IOREDIS, Poll } from '@modules/types';
 import { Repository } from "typeorm";
 import { Redis } from 'ioredis';
 import { CreatePollDto, JoinPollDto, RejoinPollDto } from '../dto/poll-request.dto';
+import { GenericPollMessageResponseDto } from '../dto/poll-response.dto';
 import { PollEntity } from '../entity/poll.entity';
 import { UserService } from '../../user/services/user.service';
 
@@ -68,16 +69,15 @@ export class PollsService {
   }
 
   public async findOneUsingRedis(id: string): Promise<PollEntity> {
-    const foundPoll = await this.findOneById(id);
-    const pollKey =  `polls:${foundPoll.id}`;
+    const pollKey =  `polls:${id}`;
 
     try {
       const stringifiedPoll = await this.redisClient.call(
         'JSON.GET',
         pollKey,
         '.',
-      );
-      const poll: PollEntity = JSON.parse(stringifiedPoll as string);
+      ) as string;;
+      const poll: PollEntity = JSON.parse(stringifiedPoll);
       this.logger.log(`The current poll is ${poll}`);
       return poll;
     } catch(error) {
@@ -86,21 +86,34 @@ export class PollsService {
     }
   }
 
-  public async addParticipant(email: string, id: string) {
-    // first, find a user by their email
-    const foundUser = await this.userService.findOneByEmail(email);
-    if (!foundUser) {
-      // TODO: we create the user and email the participate their credentials to login and change afterward.
-    }
+  public async addParticipant(
+    user_id: JoinPollDto["participant_id"], 
+    poll_id: JoinPollDto["id"]
+  ): Promise<GenericPollMessageResponseDto> {
+    const foundUser = await this.userService.findOneByUserId(user_id);
+    if (!foundUser) throw new NotFoundException();
 
-    const pollKey = `polls:${id}`;
+    const pollKey = `polls:${poll_id}`;
     const participantPath = `.participants.${foundUser.id}`;
 
     try {
-      await this.redisClient.call('JSON.SET', pollKey, participantPath, JSON.stringify(foundUser.name))
+      await this.redisClient.call('JSON.SET', pollKey, participantPath, JSON.stringify(foundUser.name));
+      const poll = await this.findOneUsingRedis(poll_id);
+      this.logger.debug(`Current participants for poll with id ${poll_id} are:`, poll.participants);
+      return {
+        "message": `@${foundUser.name} joined your poll`,
+      };
+    } catch(error) {
+      this.logger.error(`Failed to add participant ${foundUser.name} to poll with id ${poll_id}`);
+      throw new BadRequestException(error);
     }
-    catch(error ) {}
   }
-  public async join(id: string) {}
-  public async rejoin() {}
+
+  public async inviteParticipant(email: string) {
+    return await this.userService.invite(email);
+  }
+
+  public async leavePoll() {
+    // TODO: Implement leaving a live poll
+  }
 }

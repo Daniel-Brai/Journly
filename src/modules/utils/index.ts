@@ -1,1 +1,1 @@
-export * from './poll';
+export * from './generators';

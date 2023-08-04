@@ -15,7 +15,17 @@ import { UserRoles } from '@modules/types';
 
 export class UserSignupDto {
   @ApiProperty({
-    description: 'THe email of the user',
+    description: 'The username of the user',
+    example: 'johndoe45',
+    required: true,
+  })
+  @IsDefined()
+  @IsString()
+  @IsEmail()
+  public name!: string;
+  
+  @ApiProperty({
+    description: 'The email of the user',
     example: 'example@email.com',
     required: true,
   })
@@ -85,8 +95,8 @@ export class FindUserDto {
   public email!: string;
 
   @ApiProperty({
-    description: 'The full name of the user',
-    example: 'Daniel Brai',
+    description: 'The username of the user',
+    example: 'DanielBrai',
     required: false,
   })
   @IsOptional()
