@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
-import { 
-  OnGatewayInit, 
+import {
+  OnGatewayInit,
   OnGatewayConnection,
   OnGatewayDisconnect,
   WebSocketGateway,
@@ -10,16 +10,14 @@ import { Namespace, Socket } from 'socket.io';
 import { PollsService } from '../services/polls.service';
 
 @WebSocketGateway({ namespace: 'polls' })
-export class PollsGateway 
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect 
+export class PollsGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   private readonly logger = new Logger(PollsGateway.name);
 
-  constructor( 
-    private readonly pollsService: PollsService,
-  ) {}
+  constructor(private readonly pollsService: PollsService) {}
 
-  @WebSocketServer() 
+  @WebSocketServer()
   io: Namespace;
 
   afterInit(): void {

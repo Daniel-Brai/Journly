@@ -14,4 +14,3 @@ export interface Poll {
   votes_per_participant: number;
   participants: Participants;
 }
-

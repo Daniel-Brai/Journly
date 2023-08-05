@@ -12,8 +12,8 @@ import { PollEntity } from './entity/poll.entity';
 @Module({
   imports: [
     TypeOrmModule.forFeature([PollEntity]),
-    ConfigModule, 
-    RedisTransportModule, 
+    ConfigModule,
+    RedisTransportModule,
     CloudinaryModule,
     forwardRef(() => UserModule),
   ],

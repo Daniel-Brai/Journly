@@ -21,10 +21,7 @@ async function bootstrap() {
   const PORT = Number(configService.get().port);
 
   app.enableCors({
-    origin: [
-      `http://localhost:${PORT}`,
-      `http://127.0.0.1:${PORT}`,
-    ],
+    origin: [`http://localhost:${PORT}`, `http://127.0.0.1:${PORT}`],
   });
 
   app.useWebSocketAdapter(new SocketIOAdapter(app, configService));
@@ -55,7 +52,9 @@ async function bootstrap() {
     }),
   );
   app.use((req: Request, _: any, next: NextFunction) => {
-    logger.info(`[Server]: The url invoked is: '${req.originalUrl}' from ip address: ${req.ip}`);
+    logger.info(
+      `[Server]: The url invoked is: '${req.originalUrl}' from ip address: ${req.ip}`,
+    );
     next();
   });
 

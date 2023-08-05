@@ -23,7 +23,7 @@ export class UserSignupDto {
   @IsString()
   @IsEmail()
   public name!: string;
-  
+
   @ApiProperty({
     description: 'The email of the user',
     example: 'example@email.com',

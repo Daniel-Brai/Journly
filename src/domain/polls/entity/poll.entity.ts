@@ -11,7 +11,6 @@ import {
 import { UserEntity } from '../../user/entity/user.entity';
 import { Participants } from '@modules/types';
 
-
 @Entity('polls')
 export class PollEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -30,7 +29,7 @@ export class PollEntity extends BaseEntity {
   public votes_per_participant: number;
 
   @ManyToOne(() => UserEntity, (user: UserEntity) => user.polls)
-  @JoinColumn({ name: "user_id", referencedColumnName: "id" })
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   public created_by!: UserEntity;
 
   @CreateDateColumn({

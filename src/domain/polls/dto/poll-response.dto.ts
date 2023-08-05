@@ -13,7 +13,8 @@ export class CreatedPollResponseDto {
   public topic: string;
 
   @ApiResponseProperty({
-    example: 'https://cdn.cloudinary.com/dog-da9b9f51-23b8-4642-97f7-52537b3cf53b.jpg',
+    example:
+      'https://cdn.cloudinary.com/dog-da9b9f51-23b8-4642-97f7-52537b3cf53b.jpg',
   })
   public topic_image_url: string;
 
@@ -33,9 +34,8 @@ export class CreatedPollResponseDto {
 }
 
 export class GenericPollMessageResponseDto {
-  @ApiResponseProperty({ 
-    example: "@Jeremy123 joined your poll"
+  @ApiResponseProperty({
+    example: '@Jeremy123 joined your poll',
   })
   public message: string;
 }
-

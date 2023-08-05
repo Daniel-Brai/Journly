@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { 
-  Length, 
-  IsDefined, 
-  IsInt, 
+import {
+  Length,
+  IsDefined,
+  IsInt,
   IsString,
   IsUUID,
-  IsOptional, 
-  Min 
+  IsOptional,
+  Min,
 } from 'class-validator';
 
 export class CreatePollDto {
@@ -18,7 +18,7 @@ export class CreatePollDto {
   @IsString()
   @IsDefined()
   public readonly topic: string;
-  
+
   @ApiProperty({
     description: 'The topic image url of the poll',
     required: false,
@@ -26,7 +26,7 @@ export class CreatePollDto {
   @IsOptional()
   @IsString()
   public topic_image_url!: string;
-  
+
   @ApiProperty({
     description: 'The number of votes per participant in a poll',
     example: '1',

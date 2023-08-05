@@ -7,12 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 @Module({
-  imports: [
-    ConfigModule, 
-    DomainModule, 
-    TerminusModule, 
-    HttpModule,
-  ],
+  imports: [ConfigModule, DomainModule, TerminusModule, HttpModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -15,7 +15,7 @@ import { PollEntity } from './polls/entity/poll.entity';
     DatabaseModule.forRoot({
       entities: [UserEntity, PollEntity],
     }),
-    RedisTransportModule, 
+    RedisTransportModule,
     UserModule,
     AuthModule,
     PollsModule,

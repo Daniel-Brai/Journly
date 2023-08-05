@@ -29,7 +29,10 @@ import {
 import { CloudinaryService } from '@modules/cloudinary';
 import { PollsService } from '../services/polls.service';
 import { CreatePollDto } from '../dto/poll-request.dto';
-import { CreatedPollResponseDto, GenericPollMessageResponseDto } from '../dto/poll-response.dto';
+import {
+  CreatedPollResponseDto,
+  GenericPollMessageResponseDto,
+} from '../dto/poll-response.dto';
 import { AccessTokenGuard } from '../../auth/guards/access-token.guard';
 import { User } from '../../auth/guards/request-user.guard';
 import { UserEntity } from '../../user/entity/user.entity';
@@ -40,7 +43,6 @@ import {
   INTERNAL_SERVER_ERROR,
 } from '../../../app.consts';
 
-
 @ApiBearerAuth('authorization')
 @Controller('api/v1/polls')
 @ApiTags('Polls')
@@ -48,7 +50,7 @@ export class PollsController {
   constructor(
     private readonly pollsService: PollsService,
     private readonly cloudinaryService: CloudinaryService,
-  ) {} 
+  ) {}
 
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.CREATED)
@@ -65,14 +67,13 @@ export class PollsController {
   public async CreatePoll(
     @Body() body: CreatePollDto,
     @UploadedFile() file: Express.Multer.File,
-  ) { 
+  ) {
     if (file !== null && file !== undefined) {
       const { secure_url } = await this.cloudinaryService.uploadFile(file);
       body.topic_image_url = secure_url;
     }
     return this.pollsService.create(body);
   }
-
 
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.OK)
@@ -83,7 +84,7 @@ export class PollsController {
   @ApiInternalServerErrorResponse({ description: INTERNAL_SERVER_ERROR })
   @ApiOkResponse({ description: 'Poll joined successfully' })
   @ApiOperation({
-    description: "Join a poll by id",
+    description: 'Join a poll by id',
   })
   @ApiOkResponse({
     type: GenericPollMessageResponseDto,
