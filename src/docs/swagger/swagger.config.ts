@@ -6,7 +6,7 @@ import { SwaggerConfig } from './swagger.interface';
  */
 export const SWAGGER_CONFIG: SwaggerConfig = {
   title: 'Journly',
-  description: 'The API specification for the Jounrly platform',
+  description: 'The API specification for the Journly platform',
   version: '1.0',
   tags: [],
 };

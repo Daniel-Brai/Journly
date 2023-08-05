@@ -4,8 +4,9 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@modules/config';
 import { Logger } from '@modules/logger';
 import { SocketIOAdapter } from '@modules/websockets';
+import { HttpExceptionFilter } from '@modules/http/exceptions';
 import { AppModule } from './app.module';
-import { createDocument } from './docs/main';
+import { createDocument } from './docs/swagger';
 import { join } from 'path';
 import { Request, NextFunction } from 'express';
 import * as compression from 'compression';
@@ -25,6 +26,7 @@ async function bootstrap() {
   });
 
   app.useWebSocketAdapter(new SocketIOAdapter(app, configService));
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
   app.useGlobalPipes(
     new ValidationPipe({

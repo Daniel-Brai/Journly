@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as basicAuth from 'express-basic-auth';
+import * as fs from 'node:fs';
 import { ConfigService } from '@modules/config';
 import { SWAGGER_CONFIG } from './swagger.config';
 
@@ -19,6 +20,7 @@ export function createDocument(app: INestApplication) {
       'authorization',
     )
     .setDescription(SWAGGER_CONFIG.description)
+    .setExternalDoc('Postman Collection', '/api/docs-json')
     .setVersion(SWAGGER_CONFIG.version);
   for (const tag of SWAGGER_CONFIG.tags) {
     builder.addTag(tag);
@@ -28,7 +30,7 @@ export function createDocument(app: INestApplication) {
   const { username, password }: any = app.get(ConfigService).get().swagger;
   if (SWAGGER_ENVS.includes(env)) {
     app.use(
-      '/docs',
+      '/api/docs',
       basicAuth({
         challenge: true,
         users: {
@@ -37,6 +39,13 @@ export function createDocument(app: INestApplication) {
       }),
     );
     const document = SwaggerModule.createDocument(app, options);
-    SwaggerModule.setup('docs', app, document);
+    const apiEndpoints = Object.keys(document.paths).reduce((acc, path) => {
+      if (path.startsWith('/api')) {
+        acc[path] = document.paths[path];
+      }
+      return acc;
+    }, {});
+    document.paths = apiEndpoints;
+    SwaggerModule.setup('api/docs', app, document);
   }
 }

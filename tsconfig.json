@@ -11,7 +11,6 @@
     "outDir": "./apps/server",
     "baseUrl": "./",
     "paths": {
-      "@docs": ["src/docs/*"],
       "@domain/*": ["src/domain/*"],
       "@utils/*": ["src/utils/*"],
       "@modules/*": ["src/modules/*"]
