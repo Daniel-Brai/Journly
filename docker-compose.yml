@@ -1,0 +1,92 @@
+version: '3'
+
+networks:
+  journly-network:
+    external: true
+services:
+  db:
+    container_name: journly_db
+    image: postgres:15.3-alpine3.18
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - 'docker-journly-db:/var/lib/postgresql/data'
+    networks:
+      - journly-network
+  redis:
+    image: 'redislabs/rejson:2.0.0'
+    ports:
+      - '6379:6379'
+    volumes:
+      - 'docker-journly-redis:/data'
+  journly:
+    image: journly:latest
+    container_name: journly
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=danielbrai
+      - DATABASE_PASSWORD=Pvg6jjKyWIgVPyByyiJ61nEpqrL9N0WV
+      - DATABASE_NAME=docker-journly-postgres
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SWAGGER_USERNAME=Daniel_Brai
+      - SWAGGER_PASSWORD=GenericPassword!123
+      - PORT=8000
+    depends_on:
+      - db
+      - redis
+  journly_1:
+    image: journly:latest
+    container_name: journly_1
+    build: .
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=danielbrai
+      - DATABASE_PASSWORD=Pvg6jjKyWIgVPyByyiJ61nEpqrL9N0WV
+      - DATABASE_NAME=docker-journly-postgres
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SWAGGER_USERNAME=Daniel_Brai
+      - SWAGGER_PASSWORD=GenericPassword!123
+      - PORT=8001
+    depends_on:
+      - db
+      - redis
+    networks:
+      - test-network
+  journly_2:
+    image: journly:latest
+    container_name: journly_2
+    build: .
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=danielbrai
+      - DATABASE_PASSWORD=Pvg6jjKyWIgVPyByyiJ61nEpqrL9N0WV
+      - DATABASE_NAME=docker-journly-postgres
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SWAGGER_USERNAME=Daniel_Brai
+      - SWAGGER_PASSWORD=GenericPassword!123
+      - PORT=8002
+    depends_on:
+      - db
+      - redis
+    networks:
+      - journly-network
+volumes:
+  docker-journly-redis:
+  docker-journly-postgres:
+

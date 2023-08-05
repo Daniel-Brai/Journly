@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { Request, Response } from 'express';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+  getRoot(res: Response) {
+    return res.render('index', {
+      title: 'Journly - All-in-one Real time Polling',
+    });
   }
 }

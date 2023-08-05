@@ -1,5 +1,5 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import { INestApplicationContext, Logger } from '@nestjs/common';
+import { INestApplicationContext } from '@nestjs/common';
 import { ServerOptions } from "socket.io";
 import { ConfigService } from "@modules/config";
 
@@ -12,11 +12,12 @@ export class SocketIOAdapter extends IoAdapter {
   }
 
   createIOServer(port: number,  options?: ServerOptions) {
-    const clientPort = Number(this.configService.get().port);
+    const PORT = Number(this.configService.get().port);
 
     const cors = {
       origin: [
-        `http://localhost:${clientPort}`,
+        `http://localhost:${PORT}`,
+        `http://127.0.0.1:${PORT}`,
       ]
     };
 

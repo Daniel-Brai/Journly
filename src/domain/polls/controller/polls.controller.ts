@@ -26,7 +26,6 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import { Logger } from '@modules/logger';
 import { CloudinaryService } from '@modules/cloudinary';
 import { PollsService } from '../services/polls.service';
 import { CreatePollDto } from '../dto/poll-request.dto';
@@ -49,7 +48,6 @@ export class PollsController {
   constructor(
     private readonly pollsService: PollsService,
     private readonly cloudinaryService: CloudinaryService,
-    private readonly logger: Logger,
   ) {} 
 
   @UseGuards(AccessTokenGuard)
@@ -72,7 +70,6 @@ export class PollsController {
       const { secure_url } = await this.cloudinaryService.uploadFile(file);
       body.topic_image_url = secure_url;
     }
-    this.logger.info(JSON.stringify(body));
     return this.pollsService.create(body);
   }
 

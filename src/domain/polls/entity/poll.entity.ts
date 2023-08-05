@@ -26,7 +26,7 @@ export class PollEntity extends BaseEntity {
   @Column({ type: 'jsonb', default: null })
   public participants!: Participants;
 
-  @Column({ type: 'number', default: 1 })
+  @Column({ type: 'int', default: 1 })
   public votes_per_participant: number;
 
   @ManyToOne(() => UserEntity, (user: UserEntity) => user.polls)
