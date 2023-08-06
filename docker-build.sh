@@ -3,6 +3,7 @@
 IMAGE_NAME="journly"
 TAG="latest"
 DOCKERFILE_PATH="./Dockerfile"
+DOCKERCOMPOSE_FILE_PATH="docker-compose.yml"
 NETWORK_NAME="journly-network"
 
 check_docker_installed() {
@@ -24,6 +25,10 @@ create_docker_network() {
     echo "Docker network for Journly created"
 }
 
+run_docker_compose() {
+    echo "Running compose with $DOCKERCOMPOSE_FILE_PATH in detach mode"
+    docker-compose -f  "$DOCKERCOMPOSE_FILE_PATH" up -d
+}
 
 main() {
     check_docker_installed
