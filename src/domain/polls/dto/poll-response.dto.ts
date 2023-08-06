@@ -40,5 +40,5 @@ export class GenericPollMessageResponseDto {
   public message: string;
 
   @ApiResponseProperty({})
-  public data?: any; 
+  public data?: any;
 }

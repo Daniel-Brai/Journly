@@ -19,11 +19,11 @@ import { PollAccessGuard } from './guards/poll-access.guard';
     PassportModule.register({ session: false }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async(configService: ConfigService) => ({
+      useFactory: async (configService: ConfigService) => ({
         secret: `${configService.get().polls.signing_secret}`,
         signOptions: {
           expiresIn: Number(configService.get().polls.duration),
-        }
+        },
       }),
       inject: [ConfigService],
     }),
@@ -32,11 +32,7 @@ import { PollAccessGuard } from './guards/poll-access.guard';
     forwardRef(() => UserModule),
   ],
   controllers: [PollsController],
-  providers: [
-    PollsService, 
-    PollsGateway,
-    PollAccessGuard,
-  ],
+  providers: [PollsService, PollsGateway, PollAccessGuard],
   exports: [PollsService],
 })
 export class PollsModule {}

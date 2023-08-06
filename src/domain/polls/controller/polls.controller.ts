@@ -44,7 +44,6 @@ import {
   BAD_REQUEST,
   INTERNAL_SERVER_ERROR,
 } from '../../../app.consts';
-import { response } from 'express';
 
 @ApiBearerAuth('authorization')
 @Controller('api/v1/polls')
@@ -82,6 +81,7 @@ export class PollsController {
       httpOnly: true,
       sameSite: 'lax',
     });
+    res.setHeader('X-Poll-Signature', response.signature);
     return res.send(response);
   }
 
@@ -101,10 +101,17 @@ export class PollsController {
     description: '',
   })
   @Post('/join/:id')
-  public async JoinPoll(@Param() id: string, @User() user: UserEntity) {
-    return this.pollsService.addParticipant(user.id, id);
+  public async JoinPoll(@Param('id') id: string, @Response() res: any, @User() user: UserEntity) {
+    const response = await this.pollsService.addParticipant(user.id, id);
+    res.cookie('poll_signature_token', response.data.signature, {
+      httpOnly: true,
+      sameSite: 'lax',
+    });
+    res.setHeader('X-Poll-Signature', response.data.signature);
+    return res.send(response);
+
   }
-  
+
   @UseGuards(AccessTokenGuard, PollAccessGuard)
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('application/json')
@@ -120,7 +127,7 @@ export class PollsController {
     description: 'User rejoins a poll successfully',
   })
   @Post('/rejoin/:id')
-  public async RejoinPoll(@Param() id: string, @Response() res: any) {
+  public async RejoinPoll(@Param('id') id: string, @Response() res: any) {
     return res.redirect(`/polls/${id}`);
   }
 }

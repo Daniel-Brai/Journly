@@ -32,7 +32,8 @@ export class ConfigService {
       logLevel: env.LOG_LEVEL!,
       polls: {
         duration: Number(env.POLL_DURATION) || DEFAULT_CONFIG.polls.duration,
-        signing_secret: env.POLL_SIGNING_SECRET! || DEFAULT_CONFIG.polls.signing_secret,
+        signing_secret:
+          env.POLL_SIGNING_SECRET! || DEFAULT_CONFIG.polls.signing_secret,
       },
       auth: {
         expiresIn: Number(env.TOKEN_EXPIRY),

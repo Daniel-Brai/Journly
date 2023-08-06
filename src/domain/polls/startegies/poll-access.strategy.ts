@@ -9,9 +9,7 @@ export class PollAccessStrategy extends PassportStrategy(
   Strategy,
   'poll-access',
 ) {
-  constructor(
-    private readonly configService: ConfigService,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: any) => {

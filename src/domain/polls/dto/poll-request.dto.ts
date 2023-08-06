@@ -36,7 +36,7 @@ export class CreatePollDto {
   @Min(1)
   @IsInt()
   public votes_per_paricipant!: number;
-  
+
   @ApiProperty({
     description: 'The signature of the poll',
     required: true,

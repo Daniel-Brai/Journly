@@ -39,19 +39,19 @@ export class PollsService {
     this.ttl = Number(`${configService.get().polls.duration}`);
   }
 
-  public async create(user: UserEntity, poll: CreatePollDto): Promise<PollEntity> {
+  public async create(
+    user: UserEntity,
+    poll: CreatePollDto,
+  ): Promise<PollEntity> {
     try {
-      let newPoll = this.pollRepository.create(poll);
-      let data: JwtPayload = {
+      const newPoll = this.pollRepository.create(poll);
+      const data: JwtPayload = {
         pollId: newPoll.id,
-        adminId: user.name,
+        pollName: newPoll.topic,
       };
-      const signature = this.jwtService.sign(
-        data,
-        {
-          subject: user.id,
-        }
-      );
+      const signature = this.jwtService.sign(data, {
+        subject: user.id,
+      });
       newPoll.signature = signature;
       const savedPoll = await this.pollRepository.save(newPoll);
 
