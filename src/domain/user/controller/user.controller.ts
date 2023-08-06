@@ -223,7 +223,7 @@ export class UserController {
   @ApiOkResponse({
     description: 'Returns no content',
   })
-  @Delete('/profile/delete')
+  @Delete('/profile')
   public async deleteUserProfile(@User() user: UserEntity) {
     return this.userService.deleteUser(user.id);
   }

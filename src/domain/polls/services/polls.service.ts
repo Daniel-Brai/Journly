@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@modules/config';
 import { IOREDIS, Poll } from '@modules/types';
 import { Repository } from 'typeorm';
@@ -19,6 +20,8 @@ import {
 import { GenericPollMessageResponseDto } from '../dto/poll-response.dto';
 import { PollEntity } from '../entity/poll.entity';
 import { UserService } from '../../user/services/user.service';
+import { UserEntity } from '../../user/entity/user.entity';
+import { JwtPayload } from 'jsonwebtoken';
 
 @Injectable()
 export class PollsService {
@@ -27,6 +30,7 @@ export class PollsService {
 
   constructor(
     private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
     private readonly userService: UserService,
     @Inject(IOREDIS) private readonly redisClient: Redis,
     @InjectRepository(PollEntity)
@@ -35,9 +39,20 @@ export class PollsService {
     this.ttl = Number(`${configService.get().polls.duration}`);
   }
 
-  public async create(poll: CreatePollDto): Promise<PollEntity> {
+  public async create(user: UserEntity, poll: CreatePollDto): Promise<PollEntity> {
     try {
-      const newPoll = this.pollRepository.create(poll);
+      let newPoll = this.pollRepository.create(poll);
+      let data: JwtPayload = {
+        pollId: newPoll.id,
+        adminId: user.name,
+      };
+      const signature = this.jwtService.sign(
+        data,
+        {
+          subject: user.id,
+        }
+      );
+      newPoll.signature = signature;
       const savedPoll = await this.pollRepository.save(newPoll);
 
       this.logger.log(
@@ -125,6 +140,7 @@ export class PollsService {
       );
       return {
         message: `@${foundUser.name} joined your poll`,
+        data: poll,
       };
     } catch (error) {
       this.logger.error(

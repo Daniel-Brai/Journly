@@ -53,6 +53,7 @@ export interface UserServiceConfigOptions {
 
 export interface PollsConfig {
   duration: number;
+  signing_secret: string;
 }
 
 export interface ConfigData {

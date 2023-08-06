@@ -11,6 +11,7 @@ import {
   UseGuards,
   UploadedFile,
   UseInterceptors,
+  Response,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -33,6 +34,7 @@ import {
   CreatedPollResponseDto,
   GenericPollMessageResponseDto,
 } from '../dto/poll-response.dto';
+import { PollAccessGuard } from '../guards/poll-access.guard';
 import { AccessTokenGuard } from '../../auth/guards/access-token.guard';
 import { User } from '../../auth/guards/request-user.guard';
 import { UserEntity } from '../../user/entity/user.entity';
@@ -42,6 +44,7 @@ import {
   BAD_REQUEST,
   INTERNAL_SERVER_ERROR,
 } from '../../../app.consts';
+import { response } from 'express';
 
 @ApiBearerAuth('authorization')
 @Controller('api/v1/polls')
@@ -65,14 +68,21 @@ export class PollsController {
   @UseInterceptors(FileInterceptor('file'))
   @Post('')
   public async CreatePoll(
+    @Response() res: any,
     @Body() body: CreatePollDto,
     @UploadedFile() file: Express.Multer.File,
+    @User() user: UserEntity,
   ) {
     if (file !== null && file !== undefined) {
       const { secure_url } = await this.cloudinaryService.uploadFile(file);
       body.topic_image_url = secure_url;
     }
-    return this.pollsService.create(body);
+    const response = await this.pollsService.create(user, body);
+    res.cookie('poll_signature_token', response.signature, {
+      httpOnly: true,
+      sameSite: 'lax',
+    });
+    return res.send(response);
   }
 
   @UseGuards(AccessTokenGuard)
@@ -90,8 +100,27 @@ export class PollsController {
     type: GenericPollMessageResponseDto,
     description: '',
   })
-  @Put('/join/:id')
+  @Post('/join/:id')
   public async JoinPoll(@Param() id: string, @User() user: UserEntity) {
     return this.pollsService.addParticipant(user.id, id);
+  }
+  
+  @UseGuards(AccessTokenGuard, PollAccessGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiConsumes('application/json')
+  @ApiNotFoundResponse({ description: NO_ENTITY_FOUND })
+  @ApiForbiddenResponse({ description: UNAUTHORIZED_REQUEST })
+  @ApiUnprocessableEntityResponse({ description: BAD_REQUEST })
+  @ApiInternalServerErrorResponse({ description: INTERNAL_SERVER_ERROR })
+  @ApiOkResponse({ description: 'Poll rejoined successfully' })
+  @ApiOperation({
+    description: 'Rejoin a poll by id',
+  })
+  @ApiOkResponse({
+    description: 'User rejoins a poll successfully',
+  })
+  @Post('/rejoin/:id')
+  public async RejoinPoll(@Param() id: string, @Response() res: any) {
+    return res.redirect(`/polls/${id}`);
   }
 }

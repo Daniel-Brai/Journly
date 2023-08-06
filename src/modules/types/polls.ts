@@ -1,9 +1,5 @@
-export interface ParticipantData {
-  [participant_id: string]: string;
-}
-
 export interface Participants {
-  data: ParticipantData[];
+  [participant_id: string]: string;
 }
 
 export interface Poll {
@@ -13,4 +9,5 @@ export interface Poll {
   topic_image_url: string;
   votes_per_participant: number;
   participants: Participants;
+  signature: string;
 }

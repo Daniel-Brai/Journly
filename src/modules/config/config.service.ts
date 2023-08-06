@@ -31,7 +31,8 @@ export class ConfigService {
       swagger: this.parseSwaggerConfig(env, DEFAULT_CONFIG.swagger),
       logLevel: env.LOG_LEVEL!,
       polls: {
-        duration: Number(env.POLL_DURATION),
+        duration: Number(env.POLL_DURATION) || DEFAULT_CONFIG.polls.duration,
+        signing_secret: env.POLL_SIGNING_SECRET! || DEFAULT_CONFIG.polls.signing_secret,
       },
       auth: {
         expiresIn: Number(env.TOKEN_EXPIRY),

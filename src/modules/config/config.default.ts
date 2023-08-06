@@ -42,5 +42,6 @@ export const DEFAULT_CONFIG: ConfigData = {
   },
   polls: {
     duration: 30000,
+    signature: '',
   },
 };

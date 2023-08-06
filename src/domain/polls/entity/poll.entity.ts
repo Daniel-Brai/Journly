@@ -32,6 +32,9 @@ export class PollEntity extends BaseEntity {
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   public created_by!: UserEntity;
 
+  @Column({ type: 'varchar', length: 500 })
+  public signature!: string;
+  
   @CreateDateColumn({
     type: 'timestamptz',
     default: () => 'CURRENT_TIMESTAMP',

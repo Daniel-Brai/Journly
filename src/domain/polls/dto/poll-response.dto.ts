@@ -38,4 +38,7 @@ export class GenericPollMessageResponseDto {
     example: '@Jeremy123 joined your poll',
   })
   public message: string;
+
+  @ApiResponseProperty({})
+  public data?: any; 
 }

@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UseFilters } from '@nestjs/common';
 import {
   OnGatewayInit,
   OnGatewayConnection,
@@ -8,7 +8,9 @@ import {
 } from '@nestjs/websockets';
 import { Namespace, Socket } from 'socket.io';
 import { PollsService } from '../services/polls.service';
+import { WsExceptionFilter } from '@modules/websockets';
 
+@UseFilters(new WsExceptionFilter())
 @WebSocketGateway({ namespace: 'polls' })
 export class PollsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
