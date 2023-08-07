@@ -7,6 +7,7 @@
   "license": "MIT",
   "scripts": {
     "build": "nest build",
+    "build:css": "pnpm exec tailwindcss -i apps/client/public/assets/css/app.css -o apps/client/public/assets/css/app.min.css",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev-concurrent": "concurrently \"pnpm:watch:css\" \"pnpm:start:dev\"",

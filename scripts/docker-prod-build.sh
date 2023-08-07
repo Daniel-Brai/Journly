@@ -2,7 +2,7 @@
 
 IMAGE_NAME="journly"
 TAG="latest"
-DOCKERFILE_PATH="./Dockerfile"
+DOCKERFILE_PATH="../Dockerfile"
 DOCKERCOMPOSE_FILE_PATH="docker-compose.yml"
 NETWORK_NAME="journly-network"
 

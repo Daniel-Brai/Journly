@@ -8,6 +8,12 @@ services:
     container_name: journly_db
     image: postgres:15.3-alpine3.18
     restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DATABASE_PORT}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -29,16 +35,16 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_HOST=postgres
-      - DATABASE_PORT=5432
-      - DATABASE_USERNAME=danielbrai
-      - DATABASE_PASSWORD=Pvg6jjKyWIgVPyByyiJ61nEpqrL9N0WV
-      - DATABASE_NAME=docker-journly-postgres
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - SWAGGER_USERNAME=Daniel_Brai
-      - SWAGGER_PASSWORD=GenericPassword!123
-      - PORT=8000
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SWAGGER_USERNAME: ${SWAGGER_USERNAME}
+      SWAGGER_PASSWORD: ${SWAGGER_PASSWORD}
+      PORT: 8000
     depends_on:
       - db
       - redis
@@ -49,21 +55,21 @@ services:
     ports:
       - "8001:8001"
     environment:
-      - DATABASE_HOST=postgres
-      - DATABASE_PORT=5432
-      - DATABASE_USERNAME=danielbrai
-      - DATABASE_PASSWORD=Pvg6jjKyWIgVPyByyiJ61nEpqrL9N0WV
-      - DATABASE_NAME=docker-journly-postgres
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - SWAGGER_USERNAME=Daniel_Brai
-      - SWAGGER_PASSWORD=GenericPassword!123
-      - PORT=8001
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SWAGGER_USERNAME: ${SWAGGER_USERNAME}
+      SWAGGER_PASSWORD: ${SWAGGER_PASSWORD}
+      PORT: 8001
     depends_on:
       - db
       - redis
     networks:
-      - test-network
+      - journly-network
   journly_2:
     image: journly:latest
     container_name: journly_2
@@ -71,16 +77,16 @@ services:
     ports:
       - "8002:8002"
     environment:
-      - DATABASE_HOST=postgres
-      - DATABASE_PORT=5432
-      - DATABASE_USERNAME=danielbrai
-      - DATABASE_PASSWORD=Pvg6jjKyWIgVPyByyiJ61nEpqrL9N0WV
-      - DATABASE_NAME=docker-journly-postgres
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - SWAGGER_USERNAME=Daniel_Brai
-      - SWAGGER_PASSWORD=GenericPassword!123
-      - PORT=8002
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SWAGGER_USERNAME: ${SWAGGER_USERNAME}
+      SWAGGER_PASSWORD: ${SWAGGER_PASSWORD}
+      PORT: 8002
     depends_on:
       - db
       - redis

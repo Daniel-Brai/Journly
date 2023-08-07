@@ -1,25 +1,23 @@
-FROM node:20-alpine3.18 as node-build
+FROM node:20-alpine3.18
 
-WORKDIR /app
+RUN apt-get update && apt-get install -y nginx --no-install-recommends
 
-COPY package*.json pnpm-lock.yaml ./app/
+WORKDIR /journly
 
-RUN npm install -g pnpm@8.6.11
+COPY package*.json pnpm-lock.yaml ./journly/
 
-COPY . /app
-
-RUN pnpm install
-
-EXPOSE 8000
-
-CMD [ "pnpm", "run", "start:dev-concurrent" ]
-
-FROM nginx:alpine3.17-slim
+RUN npm install -g pnpm@8.6.11 && pnpm install
 
 RUN rm /etc/nginx/conf.d/default.conf
 
 COPY nginx.conf /etc/nginx/conf.d/
 
+COPY . /journly
+
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+RUN chmod +x /journly/scripts/entrypoint.sh
+
+RUN pnpm run build && pnpm run build:css
+
+CMD ["/journly/scripts/entrypoint.sh"]
