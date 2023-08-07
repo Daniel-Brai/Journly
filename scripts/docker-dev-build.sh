@@ -19,15 +19,15 @@ build_docker_image() {
     echo "Docker image build for Journly completed"
 }
 
-run_docker_compose() {
-    echo "Running compose with $DOCKERCOMPOSE_FILE_PATH in detach mode"
-    docker-compose -f  "$DOCKERCOMPOSE_FILE_PATH" up -d
+run_created_docker_image() {
+  echo "Running docker image: $IMAGE_NAME:$TAG"
+  docker run -p 8000:8000 "$IMAGE_NAME:$TAG"
 }
 
 main() {
     check_docker_installed
     build_docker_image
-    create_docker_network
+    run_created_docker_image
 }
 
 main
