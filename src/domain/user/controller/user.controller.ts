@@ -166,8 +166,8 @@ export class UserController {
   @ApiOkResponse({
     description: 'Returns no content',
   })
-  @Delete('/delete/:id')
-  public async deleteUser(@Param() id: string) {
+  @Delete('/:id')
+  public async deleteUser(@Param('id') id: string) {
     return this.userService.deleteUser(id);
   }
 
@@ -187,25 +187,6 @@ export class UserController {
   })
   @Get('/profile')
   public async getUserProfile(@User() user: UserEntity) {
-    return user;
-  }
-
-  @UseGuards(AccessTokenGuard)
-  @HttpCode(HttpStatus.OK)
-  @ApiConsumes('application/json')
-  @ApiNotFoundResponse({ description: NO_ENTITY_FOUND })
-  @ApiForbiddenResponse({ description: UNAUTHORIZED_REQUEST })
-  @ApiUnprocessableEntityResponse({ description: BAD_REQUEST })
-  @ApiInternalServerErrorResponse({ description: INTERNAL_SERVER_ERROR })
-  @ApiOkResponse({ description: 'User returned successfully' })
-  @ApiOperation({
-    description: "Update Current Session User's Profile",
-  })
-  @ApiOkResponse({
-    description: 'Returns Updated Session User details',
-  })
-  @Put('/profile')
-  public async updateUserProfile(@User() user: UserEntity) {
     return user;
   }
 

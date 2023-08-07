@@ -14,6 +14,7 @@ import { Repository } from 'typeorm';
 import { Redis } from 'ioredis';
 import {
   CreatePollDto,
+  InviteToPollDto,
   JoinPollDto,
   RejoinPollDto,
 } from '../dto/poll-request.dto';
@@ -32,7 +33,8 @@ export class PollsService {
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
-    @Inject(IOREDIS) private readonly redisClient: Redis,
+    @Inject(IOREDIS) 
+    private readonly redisClient: Redis,
     @InjectRepository(PollEntity)
     private pollRepository: Repository<PollEntity>,
   ) {
@@ -116,14 +118,12 @@ export class PollsService {
     }
   }
 
-  public async addParticipant(
-    user_id: JoinPollDto['participant_id'],
-    poll_id: JoinPollDto['id'],
-  ): Promise<GenericPollMessageResponseDto> {
-    const foundUser = await this.userService.findOneByUserId(user_id);
+  public async addParticipant(body: JoinPollDto): Promise<GenericPollMessageResponseDto> {
+    const { id, participant_id } = body;
+    const foundUser = await this.userService.findOneByUserId(participant_id);
     if (!foundUser) throw new NotFoundException();
 
-    const pollKey = `polls:${poll_id}`;
+    const pollKey = `polls:${id}`;
     const participantPath = `.participants.${foundUser.id}`;
 
     try {
@@ -133,9 +133,9 @@ export class PollsService {
         participantPath,
         JSON.stringify(foundUser.name),
       );
-      const poll = await this.findOneUsingRedis(poll_id);
+      const poll = await this.findOneUsingRedis(id);
       this.logger.debug(
-        `Current participants for poll with id ${poll_id} are:`,
+        `Current participants for poll with id ${id} are:`,
         poll.participants,
       );
       return {
@@ -144,14 +144,27 @@ export class PollsService {
       };
     } catch (error) {
       this.logger.error(
-        `Failed to add participant ${foundUser.name} to poll with id ${poll_id}`,
+        `Failed to add participant ${foundUser.name} to poll with id ${id}`,
       );
       throw new BadRequestException(error);
     }
   }
 
-  public async inviteParticipant(email: string) {
-    return await this.userService.invite(email);
+  public async inviteParticipant(id: string, body: InviteToPollDto) {
+    const { username, email } = body;
+    if (username === null && email === null) {
+      throw new BadRequestException('One of the fields must be filled in to invite a user');
+    }
+    if(username !== null && email !== null) {
+      throw new BadRequestException('You can fill in both fields');
+    }
+    if (username) {
+      const user = await this.userService.findOneByUsername(username);
+      return await this.addParticipant({id: id, participant_id: user.id});
+    }
+    if (email) {
+      return await this.userService.invite(email);
+    }
   }
 
   public async leavePoll() {

@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   Length,
   IsDefined,
+  IsEmail,
   IsInt,
   IsString,
   IsUUID,
@@ -90,4 +91,25 @@ export class RejoinPollDto {
   @IsString()
   @IsDefined()
   public readonly participant_name: string;
+}
+
+export class InviteToPollDto {
+
+  @ApiProperty({
+    description: 'The username of the user you want to invite',
+    example: 'johndoggle235',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  public username!: string;
+
+  @ApiProperty({
+    description: 'The email of the user you want to invite',
+    example: 'example@email.com',
+    required: false,
+  })
+  @IsEmail()
+  @IsOptional()
+  public email!: string;
 }

@@ -29,7 +29,7 @@ import {
 } from '@nestjs/swagger';
 import { CloudinaryService } from '@modules/cloudinary';
 import { PollsService } from '../services/polls.service';
-import { CreatePollDto } from '../dto/poll-request.dto';
+import { CreatePollDto, InviteToPollDto, JoinPollDto } from '../dto/poll-request.dto';
 import {
   CreatedPollResponseDto,
   GenericPollMessageResponseDto,
@@ -101,8 +101,8 @@ export class PollsController {
     description: '',
   })
   @Post('/join/:id')
-  public async JoinPoll(@Param('id') id: string, @Response() res: any, @User() user: UserEntity) {
-    const response = await this.pollsService.addParticipant(user.id, id);
+  public async JoinPoll(@Body() body: JoinPollDto, @Response() res: any) {
+    const response = await this.pollsService.addParticipant(body);
     res.cookie('poll_signature_token', response.data.signature, {
       httpOnly: true,
       sameSite: 'lax',
@@ -130,4 +130,26 @@ export class PollsController {
   public async RejoinPoll(@Param('id') id: string, @Response() res: any) {
     return res.redirect(`/polls/${id}`);
   }
+  
+  @UseGuards(AccessTokenGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiConsumes('application/json')
+  @ApiNotFoundResponse({ description: NO_ENTITY_FOUND })
+  @ApiForbiddenResponse({ description: UNAUTHORIZED_REQUEST })
+  @ApiUnprocessableEntityResponse({ description: BAD_REQUEST })
+  @ApiInternalServerErrorResponse({ description: INTERNAL_SERVER_ERROR })
+  @ApiOkResponse({ description: 'User invited to poll successfully' })
+  @ApiOperation({
+    description: 'Invite to a poll',
+  })
+  @ApiOkResponse({
+    type: GenericPollMessageResponseDto,
+    description: '',
+  })
+  @Post('/invite/:id')
+  public async InviteToPoll(@Body() body: InviteToPollDto, @Param('id') id: string, @Response() res: any) {
+    const response = await this.pollsService.inviteParticipant(id, body);
+    return res.send(response);
+  }
+
 }
