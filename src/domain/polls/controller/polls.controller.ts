@@ -1,13 +1,11 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
   Post,
-  Put,
   UseGuards,
   UploadedFile,
   UseInterceptors,
@@ -20,7 +18,6 @@ import {
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
-  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -29,7 +26,12 @@ import {
 } from '@nestjs/swagger';
 import { CloudinaryService } from '@modules/cloudinary';
 import { PollsService } from '../services/polls.service';
-import { CreatePollDto, InviteToPollDto, JoinPollDto } from '../dto/poll-request.dto';
+import {
+  CreatePollDto,
+  InviteToPollDto,
+  JoinPollDto,
+  LeavePollDto,
+} from '../dto/poll-request.dto';
 import {
   CreatedPollResponseDto,
   GenericPollMessageResponseDto,
@@ -109,7 +111,6 @@ export class PollsController {
     });
     res.setHeader('X-Poll-Signature', response.data.signature);
     return res.send(response);
-
   }
 
   @UseGuards(AccessTokenGuard, PollAccessGuard)
@@ -130,8 +131,37 @@ export class PollsController {
   public async RejoinPoll(@Param('id') id: string, @Response() res: any) {
     return res.redirect(`/polls/${id}`);
   }
-  
-  @UseGuards(AccessTokenGuard)
+
+  @UseGuards(AccessTokenGuard, PollAccessGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiConsumes('application/json')
+  @ApiNotFoundResponse({ description: NO_ENTITY_FOUND })
+  @ApiForbiddenResponse({ description: UNAUTHORIZED_REQUEST })
+  @ApiUnprocessableEntityResponse({ description: BAD_REQUEST })
+  @ApiInternalServerErrorResponse({ description: INTERNAL_SERVER_ERROR })
+  @ApiOkResponse({ description: 'Poll left successfully' })
+  @ApiOperation({
+    description: 'Leave a poll by id',
+  })
+  @ApiOkResponse({
+    description: 'User leaves a poll successfully',
+  })
+  @Get('/leave/:id')
+  public async LeavePoll(
+    @Body() body: LeavePollDto,
+    @Param('id') id: string,
+    @Response() res: any,
+  ) {
+    const response = await this.pollsService.leavePoll(body);
+    res.cookie('poll_signature_token', '', {
+      httpOnly: true,
+      sameSite: 'lax',
+    });
+    res.setHeader('X-Poll-Signature', '');
+    return res.send(response);
+  }
+
+  @UseGuards(AccessTokenGuard, PollAccessGuard)
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('application/json')
   @ApiNotFoundResponse({ description: NO_ENTITY_FOUND })
@@ -147,9 +177,12 @@ export class PollsController {
     description: '',
   })
   @Post('/invite/:id')
-  public async InviteToPoll(@Body() body: InviteToPollDto, @Param('id') id: string, @Response() res: any) {
+  public async InviteToPoll(
+    @Body() body: InviteToPollDto,
+    @Param('id') id: string,
+    @Response() res: any,
+  ) {
     const response = await this.pollsService.inviteParticipant(id, body);
     return res.send(response);
   }
-
 }

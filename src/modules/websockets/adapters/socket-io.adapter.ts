@@ -30,7 +30,7 @@ export class SocketIOAdapter extends IoAdapter {
     };
 
     const server: Server = super.createIOServer(port, corsOptions);
-    server.of('polls').use(createTokenMiddleware(this.jwtService, this.logger))
+    server.of('polls').use(createTokenMiddleware(this.jwtService, this.logger));
 
     return server;
   }

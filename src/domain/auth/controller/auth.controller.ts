@@ -58,6 +58,7 @@ export class AuthController {
       httpOnly: true,
       sameSite: 'lax',
     });
+    res.setHeader('X-User-Id', response.sub);
     return res.send(response);
   }
 

@@ -21,9 +21,8 @@ export class WsExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof BadRequestException) {
       const response = exception.getResponse();
-      wsException = new WsBadRequestException(
-        response['message'] ?? 'Bad Request',
-      );
+      const message = response['message'] ?? response ?? exception.name;
+      wsException = new WsBadRequestException(message);
 
       ctx.emit('exception', wsException.getError());
       return;

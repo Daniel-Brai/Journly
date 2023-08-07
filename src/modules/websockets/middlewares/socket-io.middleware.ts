@@ -4,6 +4,7 @@ import { Socket } from 'socket.io';
 
 export type SocketAuthPayload = {
   adminId: string;
+  participantId: string;
   pollId: string;
   pollName: string;
 };
@@ -11,9 +12,14 @@ export type SocketAuthPayload = {
 export type SocketAuth = Socket & SocketAuthPayload;
 
 export const createTokenMiddleware =
-  (jwtService: JwtService, logger: Logger) => (socket: SocketAuth, next: any) => {
+  (jwtService: JwtService, logger: Logger) =>
+  (socket: SocketAuth, next: any) => {
     const token =
-      socket.handshake.auth.token || socket.handshake.headers['X-Poll-Signature'];
+      socket.handshake.auth.token ||
+      socket.handshake.headers['X-Poll-Signature'];
+
+    const socketUserId =
+      (socket.handshake.headers['X-User-Id'] as string) ?? '';
 
     logger.debug(
       `Verifying poll signature token: ${token} before connection....`,
@@ -23,6 +29,7 @@ export const createTokenMiddleware =
       const payload = jwtService.verify(token);
       socket.adminId = payload.sub;
       socket.pollId = payload.pollId;
+      socket.participantId = socketUserId;
       socket.pollName = payload.pollName;
       next();
     } catch (error) {

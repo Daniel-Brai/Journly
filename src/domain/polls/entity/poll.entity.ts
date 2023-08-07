@@ -32,6 +32,9 @@ export class PollEntity extends BaseEntity {
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   public created_by!: UserEntity;
 
+  @Column({ type: 'boolean', default: false })
+  public has_started!: boolean;
+
   @Column({ type: 'varchar', length: 500, nullable: true })
   public signature!: string;
 

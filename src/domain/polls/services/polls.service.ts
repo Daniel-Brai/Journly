@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -16,6 +17,7 @@ import {
   CreatePollDto,
   InviteToPollDto,
   JoinPollDto,
+  LeavePollDto,
   RejoinPollDto,
 } from '../dto/poll-request.dto';
 import { GenericPollMessageResponseDto } from '../dto/poll-response.dto';
@@ -33,7 +35,7 @@ export class PollsService {
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
-    @Inject(IOREDIS) 
+    @Inject(IOREDIS)
     private readonly redisClient: Redis,
     @InjectRepository(PollEntity)
     private pollRepository: Repository<PollEntity>,
@@ -50,6 +52,7 @@ export class PollsService {
       const data: JwtPayload = {
         pollId: newPoll.id,
         pollName: newPoll.topic,
+        participantId: '',
       };
       const signature = this.jwtService.sign(data, {
         subject: user.id,
@@ -118,7 +121,9 @@ export class PollsService {
     }
   }
 
-  public async addParticipant(body: JoinPollDto): Promise<GenericPollMessageResponseDto> {
+  public async addParticipant(
+    body: JoinPollDto,
+  ): Promise<GenericPollMessageResponseDto> {
     const { id, participant_id } = body;
     const foundUser = await this.userService.findOneByUserId(participant_id);
     if (!foundUser) throw new NotFoundException();
@@ -133,18 +138,18 @@ export class PollsService {
         participantPath,
         JSON.stringify(foundUser.name),
       );
-      const poll = await this.findOneUsingRedis(id);
+      const updatedPoll = await this.findOneUsingRedis(id);
       this.logger.debug(
         `Current participants for poll with id ${id} are:`,
-        poll.participants,
+        updatedPoll.participants,
       );
       return {
         message: `@${foundUser.name} joined your poll`,
-        data: poll,
+        data: updatedPoll,
       };
     } catch (error) {
       this.logger.error(
-        `Failed to add participant ${foundUser.name} to poll with id ${id}`,
+        `Failed to add participant: @${foundUser.name} to poll with id ${id}`,
       );
       throw new BadRequestException(error);
     }
@@ -153,21 +158,59 @@ export class PollsService {
   public async inviteParticipant(id: string, body: InviteToPollDto) {
     const { username, email } = body;
     if (username === null && email === null) {
-      throw new BadRequestException('One of the fields must be filled in to invite a user');
+      throw new BadRequestException(
+        'One of the fields must be filled in to invite a user',
+      );
     }
-    if(username !== null && email !== null) {
+    if (username !== null && email !== null) {
       throw new BadRequestException('You can fill in both fields');
     }
     if (username) {
       const user = await this.userService.findOneByUsername(username);
-      return await this.addParticipant({id: id, participant_id: user.id});
+      return await this.addParticipant({ id: id, participant_id: user.id });
     }
     if (email) {
       return await this.userService.invite(email);
     }
   }
 
-  public async leavePoll() {
-    // TODO: Implement leaving a live poll
+  public async removeParticipant(admin_id: string, body: LeavePollDto) {
+    const { id } = body;
+    const poll = await this.findOneUsingRedis(id);
+
+    if (admin_id !== poll.created_by.id) {
+      throw new UnauthorizedException();
+    }
+
+    if (!poll.has_started) {
+      return await this.leavePoll(body);
+    }
+  }
+
+  public async leavePoll(
+    body: LeavePollDto,
+  ): Promise<GenericPollMessageResponseDto> {
+    const { id, participant_id } = body;
+    const pollKey = `polls:${id}`;
+    const participantPath = `.participants.${participant_id}`;
+
+    const foundUser = await this.userService.findOneByUserId(participant_id);
+    try {
+      await this.redisClient.call('JSON.DEL', pollKey, participantPath);
+      const updatedPoll = await this.findOneUsingRedis(id);
+      this.logger.debug(
+        `Current participants for poll with id ${id} are:`,
+        updatedPoll.participants,
+      );
+      return {
+        message: `@${foundUser.name} left the poll`,
+        data: updatedPoll,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to remove participant: @${foundUser.name} from poll with id ${id}`,
+      );
+      throw new BadRequestException(error);
+    }
   }
 }

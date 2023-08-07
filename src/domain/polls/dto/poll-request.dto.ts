@@ -93,8 +93,25 @@ export class RejoinPollDto {
   public readonly participant_name: string;
 }
 
-export class InviteToPollDto {
+export class LeavePollDto {
+  @ApiProperty({
+    description: 'The id of the poll (uuid)',
+    required: true,
+  })
+  @IsUUID()
+  @IsDefined()
+  public readonly id: string;
 
+  @ApiProperty({
+    description: 'The id of the poll participant (uuid)',
+    required: true,
+  })
+  @IsUUID()
+  @IsDefined()
+  public readonly participant_id: string;
+}
+
+export class InviteToPollDto {
   @ApiProperty({
     description: 'The username of the user you want to invite',
     example: 'johndoggle235',
