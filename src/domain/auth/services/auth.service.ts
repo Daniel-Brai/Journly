@@ -92,7 +92,11 @@ export class AuthService {
     ]);
 
     return {
-      ...data,
+      data: {
+        userId: data.userId,
+        email: data.email,
+        ...data,
+      },
       access_token: accessToken,
       refresh_token: refreshToken,
     };
@@ -125,7 +129,11 @@ export class AuthService {
     ]);
 
     return {
-      ...data,
+      data: {
+        userId: data.userId,
+        email: data.email,
+        ...data,
+      },
       access_token: accessToken,
       refresh_token: refreshToken,
     };

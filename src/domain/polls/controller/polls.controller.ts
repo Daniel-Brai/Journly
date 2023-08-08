@@ -9,7 +9,7 @@ import {
   UseGuards,
   UploadedFile,
   UseInterceptors,
-  Response,
+  Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -46,6 +46,7 @@ import {
   BAD_REQUEST,
   INTERNAL_SERVER_ERROR,
 } from '../../../app.consts';
+import { Response } from 'express';
 
 @ApiBearerAuth('authorization')
 @Controller('api/v1/polls')
@@ -72,7 +73,7 @@ export class PollsController {
     @Body() body: CreatePollDto,
     @UploadedFile() file: Express.Multer.File,
     @User() user: UserEntity,
-    @Response() res: any,
+    @Res() res: Response,
   ) {
     if (file !== null && file !== undefined) {
       const { secure_url } = await this.cloudinaryService.uploadFile(file);
@@ -83,7 +84,7 @@ export class PollsController {
       httpOnly: true,
       sameSite: 'lax',
     });
-    res.setHeader('X-Poll-Signature', response.signature);
+    res.header('X-Poll-Signature', response.signature);
     return res.send(response);
   }
 
@@ -106,14 +107,14 @@ export class PollsController {
   public async JoinPoll(
     @Param('id') id: string,
     @Body() body: JoinPollDto,
-    @Response() res: any,
+    @Res() res: Response,
   ) {
     const response = await this.pollsService.addParticipant(id, body);
     res.cookie('poll_signature_token', response.data.signature, {
       httpOnly: true,
       sameSite: 'lax',
     });
-    res.setHeader('X-Poll-Signature', response.data.signature);
+    res.header('X-Poll-Signature', response.data.signature);
     return res.send(response);
   }
 
@@ -135,14 +136,14 @@ export class PollsController {
   public async RejoinPoll(
     @Param('id') id: string,
     @Body() body: JoinPollDto,
-    @Response() res: any,
+    @Res() res: Response,
   ) {
     const response = await this.pollsService.addParticipant(id, body);
     res.cookie('poll_signature_token', response.data.signature, {
       httpOnly: true,
       sameSite: 'lax',
     });
-    res.setHeader('X-Poll-Signature', response.data.signature);
+    res.header('X-Poll-Signature', response.data.signature);
     return res.send(response);
   }
 
@@ -164,14 +165,14 @@ export class PollsController {
   public async LeavePoll(
     @Param('id') id: string,
     @Body() body: LeavePollDto,
-    @Response() res: any,
+    @Res() res: Response,
   ) {
     const response = await this.pollsService.leavePoll(id, body);
     res.cookie('poll_signature_token', '', {
       httpOnly: true,
       sameSite: 'lax',
     });
-    res.setHeader('X-Poll-Signature', '');
+    res.header('X-Poll-Signature', '');
     return res.send(response);
   }
 
@@ -194,7 +195,7 @@ export class PollsController {
   public async InviteToPoll(
     @Param('id') id: string,
     @Body() body: InviteToPollDto,
-    @Response() res: any,
+    @Res() res: Response,
   ) {
     const response = await this.pollsService.inviteParticipant(id, body);
     return res.send(response);

@@ -1,4 +1,3 @@
-import { Request, Response } from '@nestjs/common';
 import {
   Body,
   Controller,
@@ -6,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Req,
+  Res,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -25,6 +25,7 @@ import { RefreshTokenGuard } from '../guards/refresh-token.guard';
 import { AccessTokenGuard } from '../guards/access-token.guard';
 import { GoogleOauthGuard } from '../guards/google-auth.guard';
 import { GithubOauthGuard } from '../guards/github-auth.guard';
+import { Response } from 'express';
 
 @ApiBearerAuth('authorization')
 @Controller('api/v1/auth')
@@ -46,8 +47,8 @@ export class AuthController {
   @Post('/login')
   public async CreateUser(
     @Body() body: UserSignInDto,
-    @Request() _req: any,
-    @Response() res: any,
+    @Req() _req: any,
+    @Res() res: Response,
   ) {
     const response = await this.authService.validateUserByPassword(body);
     res.cookie('access_token', response.access_token, {
@@ -58,7 +59,7 @@ export class AuthController {
       httpOnly: true,
       sameSite: 'lax',
     });
-    res.setHeader('X-User-Id', response.sub);
+    res.header('X-User-Id', response.data.userId);
     return res.send(response);
   }
 
@@ -66,7 +67,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('application/json')
   @Get('/logout')
-  public async logout(@Request() _req: any, @Response() res: any) {
+  public async logout(@Req() _req: any, @Res() res: Response) {
     res.cookie('access_token', '', {
       httpOnly: true,
       sameSite: 'lax',
@@ -75,6 +76,7 @@ export class AuthController {
       httpOnly: true,
       sameSite: 'lax',
     });
+    res.header('X-User-Id', '');
     return res.send();
   }
 
@@ -95,7 +97,7 @@ export class AuthController {
   @UseGuards(GoogleOauthGuard)
   @HttpCode(HttpStatus.OK)
   @Get('social/google/callback')
-  public async googleAuthRedirect(@Request() req: any, @Response() res: any) {
+  public async googleAuthRedirect(@Req() req: any, @Res() res: Response) {
     const response = await this.authService.createSocialAuthToken(req.user);
     res.cookie('access_token', response.access_token, {
       httpOnly: true,
@@ -105,6 +107,7 @@ export class AuthController {
       httpOnly: true,
       sameSite: 'lax',
     });
+    res.header('X-User-Id', response.data.userId);
     return res.redirect('/');
   }
 
@@ -116,7 +119,7 @@ export class AuthController {
   @UseGuards(GithubOauthGuard)
   @HttpCode(HttpStatus.OK)
   @Get('social/github/callback')
-  public async githubAuthRedirect(@Request() req: any, @Response() res: any) {
+  public async githubAuthRedirect(@Req() req: any, @Res() res: Response) {
     const response = await this.authService.createSocialAuthToken(req.user);
     res.cookie('access_token', response.access_token, {
       httpOnly: true,
@@ -126,6 +129,7 @@ export class AuthController {
       httpOnly: true,
       sameSite: 'lax',
     });
+    res.header('X-User-Id', response.data.userId);
     return res.redirect(`/`);
   }
 }

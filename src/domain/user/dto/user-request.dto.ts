@@ -21,7 +21,6 @@ export class UserSignupDto {
   })
   @IsDefined()
   @IsString()
-  @IsEmail()
   public name!: string;
 
   @ApiProperty({
