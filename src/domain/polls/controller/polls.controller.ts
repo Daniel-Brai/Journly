@@ -69,10 +69,10 @@ export class PollsController {
   @UseInterceptors(FileInterceptor('file'))
   @Post('')
   public async CreatePoll(
-    @Response() res: any,
     @Body() body: CreatePollDto,
     @UploadedFile() file: Express.Multer.File,
     @User() user: UserEntity,
+    @Response() res: any,
   ) {
     if (file !== null && file !== undefined) {
       const { secure_url } = await this.cloudinaryService.uploadFile(file);
@@ -103,8 +103,8 @@ export class PollsController {
     description: '',
   })
   @Post('/join/:id')
-  public async JoinPoll(@Body() body: JoinPollDto, @Response() res: any) {
-    const response = await this.pollsService.addParticipant(body);
+  public async JoinPoll(@Param('id') id: string, @Body() body: JoinPollDto, @Response() res: any) {
+    const response = await this.pollsService.addParticipant(id, body);
     res.cookie('poll_signature_token', response.data.signature, {
       httpOnly: true,
       sameSite: 'lax',
@@ -113,7 +113,7 @@ export class PollsController {
     return res.send(response);
   }
 
-  @UseGuards(AccessTokenGuard, PollAccessGuard)
+  @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('application/json')
   @ApiNotFoundResponse({ description: NO_ENTITY_FOUND })
@@ -128,8 +128,14 @@ export class PollsController {
     description: 'User rejoins a poll successfully',
   })
   @Post('/rejoin/:id')
-  public async RejoinPoll(@Param('id') id: string, @Response() res: any) {
-    return res.redirect(`/polls/${id}`);
+  public async RejoinPoll(@Param('id') id: string, @Body() body: JoinPollDto, @Response() res: any) {
+    const response = await this.pollsService.addParticipant(id, body);
+    res.cookie('poll_signature_token', response.data.signature, {
+      httpOnly: true,
+      sameSite: 'lax',
+    });
+    res.setHeader('X-Poll-Signature', response.data.signature);
+    return res.send(response);
   }
 
   @UseGuards(AccessTokenGuard, PollAccessGuard)
@@ -148,11 +154,11 @@ export class PollsController {
   })
   @Get('/leave/:id')
   public async LeavePoll(
-    @Body() body: LeavePollDto,
     @Param('id') id: string,
+    @Body() body: LeavePollDto,
     @Response() res: any,
   ) {
-    const response = await this.pollsService.leavePoll(body);
+    const response = await this.pollsService.leavePoll(id, body);
     res.cookie('poll_signature_token', '', {
       httpOnly: true,
       sameSite: 'lax',
@@ -178,8 +184,8 @@ export class PollsController {
   })
   @Post('/invite/:id')
   public async InviteToPoll(
-    @Body() body: InviteToPollDto,
     @Param('id') id: string,
+    @Body() body: InviteToPollDto,
     @Response() res: any,
   ) {
     const response = await this.pollsService.inviteParticipant(id, body);

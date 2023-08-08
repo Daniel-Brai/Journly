@@ -112,7 +112,7 @@ export class PollsService {
         pollKey,
         '.',
       )) as string;
-      const poll: PollEntity = JSON.parse(stringifiedPoll);
+      const poll = JSON.parse(stringifiedPoll) as PollEntity;
       this.logger.log(`The current poll is ${poll}`);
       return poll;
     } catch (error) {
@@ -122,16 +122,18 @@ export class PollsService {
   }
 
   public async addParticipant(
+    id: string,
     body: JoinPollDto,
   ): Promise<GenericPollMessageResponseDto> {
-    const { id, participant_id } = body;
+    const { participant_id } = body;
     const foundUser = await this.userService.findOneByUserId(participant_id);
     if (!foundUser) throw new NotFoundException();
 
-    const pollKey = `polls:${id}`;
     const participantPath = `.participants.${foundUser.id}`;
 
     try {
+      const foundPoll = await this.findOneUsingRedis(id);
+      const pollKey = `polls:${foundPoll.id}`;
       await this.redisClient.call(
         'JSON.SET',
         pollKey,
@@ -167,30 +169,30 @@ export class PollsService {
     }
     if (username) {
       const user = await this.userService.findOneByUsername(username);
-      return await this.addParticipant({ id: id, participant_id: user.id });
+      return await this.addParticipant(id, { participant_id: user.id });
     }
     if (email) {
       return await this.userService.invite(email);
     }
   }
 
-  public async removeParticipant(admin_id: string, body: LeavePollDto) {
-    const { id } = body;
-    const poll = await this.findOneUsingRedis(id);
+  public async removeParticipant(admin_id: string, poll_id: string, body: LeavePollDto) {
+    const poll = await this.findOneUsingRedis(poll_id);
 
     if (admin_id !== poll.created_by.id) {
       throw new UnauthorizedException();
     }
 
     if (!poll.has_started) {
-      return await this.leavePoll(body);
+      return await this.leavePoll(poll_id, body);
     }
   }
 
   public async leavePoll(
+    id: string,
     body: LeavePollDto,
   ): Promise<GenericPollMessageResponseDto> {
-    const { id, participant_id } = body;
+    const { participant_id } = body;
     const pollKey = `polls:${id}`;
     const participantPath = `.participants.${participant_id}`;
 

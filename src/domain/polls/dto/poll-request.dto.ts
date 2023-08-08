@@ -50,14 +50,6 @@ export class CreatePollDto {
 
 export class JoinPollDto {
   @ApiProperty({
-    description: 'The id of the poll (uuid)',
-    required: true,
-  })
-  @IsUUID()
-  @IsDefined()
-  public readonly id: string;
-
-  @ApiProperty({
     description: 'The id of the poll participant (uuid)',
     required: true,
   })
@@ -67,14 +59,6 @@ export class JoinPollDto {
 }
 
 export class RejoinPollDto {
-  @ApiProperty({
-    description: 'The id of the poll (uuid)',
-    required: true,
-  })
-  @IsUUID()
-  @IsDefined()
-  public readonly id: string;
-
   @ApiProperty({
     description: 'The creator of the poll user id (uuid)',
     required: true,
@@ -95,20 +79,12 @@ export class RejoinPollDto {
 
 export class LeavePollDto {
   @ApiProperty({
-    description: 'The id of the poll (uuid)',
-    required: true,
-  })
-  @IsUUID()
-  @IsDefined()
-  public readonly id: string;
-
-  @ApiProperty({
     description: 'The id of the poll participant (uuid)',
     required: true,
   })
   @IsUUID()
   @IsDefined()
-  public readonly participant_id: string;
+  public readonly participant_id!: string;
 }
 
 export class InviteToPollDto {
