@@ -176,7 +176,11 @@ export class PollsService {
     }
   }
 
-  public async removeParticipant(admin_id: string, poll_id: string, body: LeavePollDto) {
+  public async removeParticipant(
+    admin_id: string,
+    poll_id: string,
+    body: LeavePollDto,
+  ) {
     const poll = await this.findOneUsingRedis(poll_id);
 
     if (admin_id !== poll.created_by.id) {

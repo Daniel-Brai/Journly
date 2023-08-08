@@ -1,8 +1,17 @@
-import { Logger, UsePipes, UseFilters, ValidationPipe } from '@nestjs/common';
 import {
+  Logger,
+  UseGuards,
+  UsePipes,
+  UseFilters,
+  ValidationPipe,
+} from '@nestjs/common';
+import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayInit,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
@@ -12,7 +21,9 @@ import {
   WsExceptionFilter,
   SocketAuth,
   POLL_UPDATED,
+  POLL_REMOVE_PARTICIPANT,
 } from '@modules/websockets';
+import { PollAdminGuard } from '../guards/poll-admin.guard';
 
 @UsePipes(new ValidationPipe())
 @UseFilters(new WsExceptionFilter())
@@ -43,14 +54,13 @@ export class PollsGateway
     const connectedClients = this.io.adapter.rooms?.get(roomName)?.size ?? 0;
 
     this.logger.debug(
-      `A user wid id: ${client.participantId} joined a poll created by ${client.adminId} with the room name: ${roomName}`,
+      `A user with id: ${client.participantId} joined a poll created by ${client.adminId} with the room name: ${roomName}`,
     );
     this.logger.debug(
       `Total clients connected to the room '${roomName}': ${connectedClients}`,
     );
 
-    const updatedPoll = await this.pollsService.addParticipant({
-      id: client.pollId,
+    const updatedPoll = await this.pollsService.addParticipant(client.pollId, {
       participant_id: client.participantId,
     });
     this.io.to(roomName).emit(POLL_UPDATED, updatedPoll);
@@ -62,11 +72,9 @@ export class PollsGateway
     const roomName = client.pollId;
     const connectedClients = this.io.adapter.rooms?.get(roomName)?.size ?? 0;
 
-    const dto = {
-      id: client.pollId,
+    const updatedPoll = await this.pollsService.leavePoll(client.pollId, {
       participant_id: client.participantId,
-    };
-    const updatedPoll = await this.pollsService.leavePoll(dto);
+    });
     this.logger.log(`Websocket Client with ${client.id} disconnected...`);
     this.logger.debug(`Number of connected sockets are: ${sockets.size}...`);
     this.logger.debug(
@@ -75,6 +83,28 @@ export class PollsGateway
 
     if (updatedPoll) {
       this.io.to(roomName).emit(POLL_UPDATED, updatedPoll);
+    }
+  }
+
+  @UseGuards(PollAdminGuard)
+  @SubscribeMessage(POLL_REMOVE_PARTICIPANT)
+  async removeParticipant(
+    @MessageBody('id') id: string,
+    @ConnectedSocket() client: SocketAuth,
+  ) {
+    this.logger.debug(
+      `Attempting to remove participant with id: ${id} from the poll ${client.pollId}`,
+    );
+    const updatedPoll = await this.pollsService.removeParticipant(
+      client.adminId,
+      client.pollId,
+      {
+        participant_id: id,
+      },
+    );
+
+    if (updatedPoll) {
+      this.io.to(client.pollId).emit(POLL_UPDATED, updatedPoll);
     }
   }
 }

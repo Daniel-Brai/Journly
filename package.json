@@ -1,7 +1,7 @@
 {
   "name": "Journly",
   "version": "1.0.0",
-  "description": "An Open-source live polling/voting application designed to facilitate interactive and engaging experiences for various events, conferences, and online platforms",
+  "description": "An Open-source live polling application designed to facilitate interactive and engaging experiences for various events, conferences, and online platforms",
   "author": "Daniel Brai",
   "private": true,
   "license": "MIT",
@@ -11,6 +11,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev-concurrent": "concurrently \"pnpm:watch:css\" \"pnpm:start:dev\"",
+    "start:dev-docker": "chmod +x ./scripts/docker-dev-build.sh && ./scripts/docker-dev-build.sh",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import {
   WsBadRequestException,
+  WsTypeException,
   WsUnauthorizedException,
   WsUnknownException,
 } from '../types/ws-exception.type';
@@ -26,6 +27,10 @@ export class WsExceptionFilter implements ExceptionFilter {
 
       ctx.emit('exception', wsException.getError());
       return;
+    }
+
+    if (exception instanceof WsTypeException) {
+      ctx.emit('exception', exception.getError());
     }
 
     wsException = new WsUnknownException(exception.message);

@@ -103,7 +103,11 @@ export class PollsController {
     description: '',
   })
   @Post('/join/:id')
-  public async JoinPoll(@Param('id') id: string, @Body() body: JoinPollDto, @Response() res: any) {
+  public async JoinPoll(
+    @Param('id') id: string,
+    @Body() body: JoinPollDto,
+    @Response() res: any,
+  ) {
     const response = await this.pollsService.addParticipant(id, body);
     res.cookie('poll_signature_token', response.data.signature, {
       httpOnly: true,
@@ -128,7 +132,11 @@ export class PollsController {
     description: 'User rejoins a poll successfully',
   })
   @Post('/rejoin/:id')
-  public async RejoinPoll(@Param('id') id: string, @Body() body: JoinPollDto, @Response() res: any) {
+  public async RejoinPoll(
+    @Param('id') id: string,
+    @Body() body: JoinPollDto,
+    @Response() res: any,
+  ) {
     const response = await this.pollsService.addParticipant(id, body);
     res.cookie('poll_signature_token', response.data.signature, {
       httpOnly: true,
