@@ -59,7 +59,7 @@ export class AuthController {
       httpOnly: true,
       sameSite: 'lax',
     });
-    res.header('X-User-Id', response.data.userId);
+    res.setHeader('X-User-Id', response.data.userId);
     return res.send(response);
   }
 
@@ -76,7 +76,7 @@ export class AuthController {
       httpOnly: true,
       sameSite: 'lax',
     });
-    res.header('X-User-Id', '');
+    res.setHeader('X-User-Id', '');
     return res.send();
   }
 
@@ -107,7 +107,7 @@ export class AuthController {
       httpOnly: true,
       sameSite: 'lax',
     });
-    res.header('X-User-Id', response.data.userId);
+    res.setHeader('X-User-Id', response.data.userId);
     return res.redirect('/');
   }
 
@@ -129,7 +129,7 @@ export class AuthController {
       httpOnly: true,
       sameSite: 'lax',
     });
-    res.header('X-User-Id', response.data.userId);
+    res.setHeader('X-User-Id', response.data.userId);
     return res.redirect(`/`);
   }
 }

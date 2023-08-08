@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserEntity } from '../../user/entity/user.entity';
-import { Participants } from '@modules/types';
+import { Nominations, Participants } from '@modules/types';
 
 @Entity('polls')
 export class PollEntity extends BaseEntity {
@@ -22,11 +22,14 @@ export class PollEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 500, nullable: true })
   public topic_image_url!: string;
 
-  @Column({ type: 'jsonb', default: null })
+  @Column({ type: 'jsonb', default: {} })
   public participants!: Participants;
 
   @Column({ type: 'int', default: 1 })
   public votes_per_participant: number;
+  
+  @Column({ type: 'jsonb', default: {} })
+  public nominations!: Nominations;
 
   @ManyToOne(() => UserEntity, (user: UserEntity) => user.polls)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })

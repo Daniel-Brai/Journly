@@ -1,6 +1,6 @@
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@modules/config';
 import { Logger } from '@modules/logger';
 import { SocketIOAdapter } from '@modules/websockets';
@@ -8,7 +8,7 @@ import { HttpExceptionFilter } from '@modules/http/exceptions';
 import { AppModule } from './app.module';
 import { createDocument } from './docs/swagger';
 import { join } from 'path';
-import { Request, NextFunction } from 'express';
+import * as express from 'express';
 import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
@@ -17,7 +17,6 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
   const logger = app.get(Logger);
-  const reflector = app.get(Reflector);
 
   const PORT = Number(configService.get().port);
 
@@ -27,7 +26,6 @@ async function bootstrap() {
 
   app.useWebSocketAdapter(new SocketIOAdapter(app, configService));
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -45,6 +43,7 @@ async function bootstrap() {
 
   app.use(compression());
   app.use(cookieParser());
+  app.use(express.urlencoded({ extended: true }));
   app.use(
     helmet.contentSecurityPolicy({
       useDefaults: true,
@@ -53,7 +52,7 @@ async function bootstrap() {
       },
     }),
   );
-  app.use((req: Request, _: any, next: NextFunction) => {
+  app.use((req: express.Request, _: any, next: express.NextFunction) => {
     logger.info(
       `[Server]: The url invoked is: '${req.originalUrl}' from ip address: ${req.ip}`,
     );

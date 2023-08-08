@@ -84,7 +84,7 @@ export class PollsController {
       httpOnly: true,
       sameSite: 'lax',
     });
-    res.header('X-Poll-Signature', response.signature);
+    res.setHeader('X-Poll-Signature', response.signature);
     return res.send(response);
   }
 
@@ -114,7 +114,7 @@ export class PollsController {
       httpOnly: true,
       sameSite: 'lax',
     });
-    res.header('X-Poll-Signature', response.data.signature);
+    res.setHeader('X-Poll-Signature', response.data.signature);
     return res.send(response);
   }
 
@@ -143,7 +143,7 @@ export class PollsController {
       httpOnly: true,
       sameSite: 'lax',
     });
-    res.header('X-Poll-Signature', response.data.signature);
+    res.setHeader('X-Poll-Signature', response.data.signature);
     return res.send(response);
   }
 
@@ -172,7 +172,7 @@ export class PollsController {
       httpOnly: true,
       sameSite: 'lax',
     });
-    res.header('X-Poll-Signature', '');
+    res.setHeader('X-Poll-Signature', '');
     return res.send(response);
   }
 
