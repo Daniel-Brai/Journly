@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   Length,
+  IsArray,
   IsDefined,
   IsEmail,
   IsInt,
@@ -127,7 +128,6 @@ export class AddNominationDto {
   public description!: string;
 }
 
-
 export class RemoveNominationDto {
   @ApiProperty({
     description: 'The id of the nomination (uuid)',
@@ -146,4 +146,22 @@ export class AddNominationDataDto {
   @IsObject()
   @IsDefined()
   public nomination!: AddNominationDto;
+}
+
+export class AddRankingsDataDto {
+  @ApiProperty({
+    description: 'The id of the poll participant (uuid)',
+    required: true,
+  })
+  @IsUUID()
+  @IsDefined()
+  public participant_id!: string;
+
+  @ApiProperty({
+    description: 'The rankings made by a participant',
+    required: true,
+  })
+  @IsArray()
+  @IsDefined()
+  public rankings!: string[];
 }

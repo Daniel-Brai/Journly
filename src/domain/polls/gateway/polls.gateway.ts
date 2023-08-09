@@ -24,6 +24,9 @@ import {
   POLL_REMOVE_PARTICIPANT,
   POLL_PARTICIPANT_ADD_NOMINATION,
   POLL_PARTICIPANT_DEL_NOMINATION,
+  POLL_STARTED,
+  WsBadRequestException,
+  POLL_RANKING_SUBMITTED,
 } from '@modules/websockets';
 import { PollAdminGuard } from '../guards/poll-admin.guard';
 import { AddNominationDto, RemoveNominationDto } from '../dto/poll-request.dto';
@@ -148,4 +151,33 @@ export class PollsGateway
     }
   }
 
+  @UseGuards(PollAdminGuard)
+  @SubscribeMessage(POLL_STARTED)
+  async startPoll(@ConnectedSocket() client: SocketAuth) {
+    this.logger.debug(`Attempting to start poll with id: ${client.pollId}`);
+    const poll = await this.pollsService.findOneUsingRedis(client.id);
+    if (!poll.has_started) {
+      await this.pollsService.startPoll(client.id);
+      this.io.to(client.pollId).emit(POLL_STARTED, poll);
+    } else {
+      throw new WsBadRequestException('Poll has already been started');
+    }
+  }
+
+  @SubscribeMessage(POLL_RANKING_SUBMITTED)
+  async submitRankings(
+    @MessageBody('rankings') rankings: string[],
+    @ConnectedSocket() client: SocketAuth,
+  ) {
+    this.logger.debug(
+      `Attempting to submit to the poll with id: ${client.pollId}`,
+    );
+    const updatedPoll = await this.pollsService.submitRankings(client.pollId, {
+      participant_id: client.participantId,
+      rankings: rankings,
+    });
+    if (updatedPoll) {
+      this.io.to(client.pollId).emit(POLL_UPDATED);
+    }
+  }
 }

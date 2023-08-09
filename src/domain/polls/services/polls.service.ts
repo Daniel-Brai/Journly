@@ -16,6 +16,7 @@ import { Repository } from 'typeorm';
 import { Redis } from 'ioredis';
 import {
   AddNominationDto,
+  AddRankingsDataDto,
   CreatePollDto,
   InviteToPollDto,
   JoinPollDto,
@@ -56,7 +57,9 @@ export class PollsService {
         pollName: newPoll.topic,
         participantId: '',
       };
-      const signature = this.jwtService.sign(data, {
+      const signature = await this.jwtService.signAsync(data, {
+        secret: `${this.configService.get().polls.signing_secret}`,
+        expiresIn: Number(this.configService.get().polls.duration),
         subject: user.id,
       });
       newPoll.signature = signature;
@@ -263,19 +266,79 @@ export class PollsService {
     const nominationPath = `.nominations.${body.nomination_id}`;
 
     try {
-      await this.redisClient.call(
-        'JSON.DEL',
-        pollKey,
-        nominationPath,
-      );
+      await this.redisClient.call('JSON.DEL', pollKey, nominationPath);
 
       const updatedPoll = await this.findOneUsingRedis(id);
       return updatedPoll;
     } catch (error) {
       this.logger.error(
-        `Failed to remove nomination: @${body.nomination_id} from poll with id ${id}`,
+        `Failed to remove nomination with id: ${body.nomination_id} from poll with id ${id}`,
       );
       throw new InternalServerErrorException(error);
     }
+  }
+
+  public async startPoll(id: string): Promise<GenericPollMessageResponseDto> {
+    const pollKey = `polls:${id}`;
+    const hasStartedPath = '.has_started';
+
+    try {
+      await this.redisClient.call(
+        'JSON.SET',
+        pollKey,
+        hasStartedPath,
+        JSON.stringify(true),
+      );
+      const updatedPoll = await this.findOneUsingRedis(id);
+      return {
+        message: 'The poll has been started by the admin',
+        data: updatedPoll,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to start the poll with id ${id}`);
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  public async addRankings(
+    id: string,
+    body: AddRankingsDataDto,
+  ): Promise<GenericPollMessageResponseDto> {
+    const pollKey = `polls:${id}`;
+    const rankingsPath = `.rankings.${body.participant_id}`;
+
+    try {
+      await this.redisClient.call(
+        'JSON.SET',
+        pollKey,
+        rankingsPath,
+        JSON.stringify(body.rankings),
+      );
+      const foundUser = await this.userService.findOneByUserId(
+        body.participant_id,
+      );
+      const updatedPoll = await this.findOneUsingRedis(id);
+      return {
+        message: `@${foundUser.name} just ranked a nomination`,
+        data: updatedPoll,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to add ranking to the poll with id ${id}`);
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  public async submitRankings(
+    id: string,
+    body: AddRankingsDataDto,
+  ): Promise<GenericPollMessageResponseDto> {
+    const poll = await this.findOneUsingRedis(id);
+
+    if (!poll) {
+      throw new BadRequestException(
+        `Rankings cannot be added before the poll is created or started`,
+      );
+    }
+    return await this.addRankings(id, body);
   }
 }
