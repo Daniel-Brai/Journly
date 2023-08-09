@@ -1,15 +1,15 @@
 export type Participants = {
   [participant_id: string]: string;
-}
+};
 
 export type Nomination = {
   participant_id: string;
   description: string;
-}
+};
 
 export type Nominations = {
   [nomination_id: string]: Nomination;
-}
+};
 
 export type Poll = {
   id: string;
@@ -20,4 +20,4 @@ export type Poll = {
   participants: Participants;
   nominations: Nominations;
   signature: string;
-}
+};

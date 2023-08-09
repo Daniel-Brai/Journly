@@ -4,6 +4,7 @@ import {
   IsDefined,
   IsEmail,
   IsInt,
+  IsObject,
   IsString,
   IsUUID,
   IsOptional,
@@ -105,4 +106,44 @@ export class InviteToPollDto {
   @IsEmail()
   @IsOptional()
   public email!: string;
+}
+
+export class AddNominationDto {
+  @ApiProperty({
+    description: 'The id of the poll participant (uuid)',
+    required: true,
+  })
+  @IsUUID()
+  @IsDefined()
+  public participant_id!: string;
+
+  @ApiProperty({
+    description: 'The description of the nomination chosen by the participant',
+    required: true,
+  })
+  @Length(1, 100)
+  @IsString()
+  @IsDefined()
+  public description!: string;
+}
+
+
+export class RemoveNominationDto {
+  @ApiProperty({
+    description: 'The id of the nomination (uuid)',
+    required: true,
+  })
+  @IsUUID()
+  @IsDefined()
+  public nomination_id!: string;
+}
+
+export class AddNominationDataDto {
+  @ApiProperty({
+    description: 'The shape of the nomination object',
+    required: true,
+  })
+  @IsObject()
+  @IsDefined()
+  public nomination!: AddNominationDto;
 }

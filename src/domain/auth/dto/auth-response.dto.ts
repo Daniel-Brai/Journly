@@ -2,7 +2,7 @@ import { ApiResponseProperty } from '@nestjs/swagger';
 import { IsDefined, IsEmail, IsString, IsObject } from 'class-validator';
 
 export class UserDataDto {
- @ApiResponseProperty({
+  @ApiResponseProperty({
     example: 'da9b9f51-23b8-4642-97f7-52537b3cf53b',
     format: 'v4',
   })
@@ -32,7 +32,7 @@ export class UserSignInResponseDto {
   })
   @IsString()
   public access_token: string;
-  
+
   @ApiResponseProperty({
     example: 'euuuuuuuwscdswcscfdes.fwdesfwdwfcews.qwdewefdwefw',
   })

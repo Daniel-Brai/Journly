@@ -10,15 +10,17 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@modules/config';
-import { IOREDIS, Poll } from '@modules/types';
+import { IOREDIS } from '@modules/types';
+import { createRandomString } from '@modules/utils';
 import { Repository } from 'typeorm';
 import { Redis } from 'ioredis';
 import {
+  AddNominationDto,
   CreatePollDto,
   InviteToPollDto,
   JoinPollDto,
   LeavePollDto,
-  RejoinPollDto,
+  RemoveNominationDto,
 } from '../dto/poll-request.dto';
 import { GenericPollMessageResponseDto } from '../dto/poll-response.dto';
 import { PollEntity } from '../entity/poll.entity';
@@ -217,6 +219,63 @@ export class PollsService {
         `Failed to remove participant: @${foundUser.name} from poll with id ${id}`,
       );
       throw new BadRequestException(error);
+    }
+  }
+
+  public async addNomination(
+    id: string,
+    body: AddNominationDto,
+  ): Promise<GenericPollMessageResponseDto> {
+    const nominationId = createRandomString();
+    const pollKey = `polls:${id}`;
+    const nominationPath = `.nominations.${nominationId}`;
+
+    const foundUser = await this.userService.findOneByUserId(
+      body.participant_id,
+    );
+
+    try {
+      await this.redisClient.call(
+        'JSON.SET',
+        pollKey,
+        nominationPath,
+        JSON.stringify(body),
+      );
+
+      const updatedPoll = await this.findOneUsingRedis(id);
+      return {
+        message: `@${foundUser.name} just nominated!`,
+        data: updatedPoll,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Failed to remove participant: @${foundUser.name} from poll with id ${id}`,
+      );
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  public async removeNomination(
+    id: string,
+    body: RemoveNominationDto,
+  ): Promise<PollEntity> {
+    const pollKey = `polls:${id}`;
+    const nominationPath = `.nominations.${body.nomination_id}`;
+
+    try {
+      await this.redisClient.call(
+        'JSON.DEL',
+        pollKey,
+        nominationPath,
+      );
+
+      const updatedPoll = await this.findOneUsingRedis(id);
+      return updatedPoll;
+    } catch (error) {
+      this.logger.error(
+        `Failed to remove nomination: @${body.nomination_id} from poll with id ${id}`,
+      );
+      throw new InternalServerErrorException(error);
     }
   }
 }

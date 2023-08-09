@@ -27,7 +27,7 @@ export class PollEntity extends BaseEntity {
 
   @Column({ type: 'int', default: 1 })
   public votes_per_participant: number;
-  
+
   @Column({ type: 'jsonb', default: {} })
   public nominations!: Nominations;
 
