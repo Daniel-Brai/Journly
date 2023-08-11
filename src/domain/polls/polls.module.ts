@@ -16,17 +16,8 @@ import { PollAccessGuard } from './guards/poll-access.guard';
   imports: [
     TypeOrmModule.forFeature([PollEntity]),
     ConfigModule,
-    PassportModule.register({ session: false }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: `${configService.get().polls.signing_secret}`,
-        signOptions: {
-          expiresIn: Number(configService.get().polls.duration),
-        },
-      }),
-      inject: [ConfigService],
-    }),
+    PassportModule.register({ defaultStrategy: 'poll-access', session: false }),
+    JwtModule.register({}),
     RedisTransportModule,
     CloudinaryModule,
     forwardRef(() => UserModule),

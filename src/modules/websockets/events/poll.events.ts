@@ -7,3 +7,5 @@ export const POLL_PARTICIPANT_DEL_NOMINATION =
 export const POLL_STARTED = 'poll-started';
 export const POLL_PARTICIPANT_VOTED = 'poll-participant-voted';
 export const POLL_RANKING_SUBMITTED = 'poll-ranking-submitted';
+export const POLL_CLOSED = 'poll-closed';
+export const POLL_ENDED = 'poll-ended';

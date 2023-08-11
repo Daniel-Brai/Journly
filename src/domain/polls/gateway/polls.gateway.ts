@@ -27,9 +27,12 @@ import {
   POLL_STARTED,
   WsBadRequestException,
   POLL_RANKING_SUBMITTED,
+  POLL_CLOSED,
+  POLL_ENDED,
 } from '@modules/websockets';
 import { PollAdminGuard } from '../guards/poll-admin.guard';
 import { AddNominationDto, RemoveNominationDto } from '../dto/poll-request.dto';
+import { Socket } from 'dgram';
 
 @UsePipes(new ValidationPipe())
 @UseFilters(new WsExceptionFilter())
@@ -179,5 +182,25 @@ export class PollsGateway
     if (updatedPoll) {
       this.io.to(client.pollId).emit(POLL_UPDATED);
     }
+  }
+
+  @UseGuards(PollAdminGuard)
+  @SubscribeMessage(POLL_CLOSED)
+  async closePoll(@ConnectedSocket() client: SocketAuth) {
+    this.logger.debug(`Closing the poll with id ${client.pollId} and tallying results`);
+
+    const poll = await this.pollsService.tallyResults(client.pollId);
+
+    this.io.to(client.pollId).emit(POLL_CLOSED, poll);
+  }
+
+  @UseGuards(PollAdminGuard)
+  @SubscribeMessage(POLL_ENDED)
+  async endPoll(@ConnectedSocket() client: SocketAuth) {
+    this.logger.debug(`Ending the poll with the id ${client.pollId}`);
+
+    await this.pollsService.deletePoll(client.pollId);
+
+    this.io.to(client.pollId).emit(POLL_ENDED);
   }
 }

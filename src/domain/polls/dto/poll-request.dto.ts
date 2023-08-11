@@ -165,3 +165,37 @@ export class AddRankingsDataDto {
   @IsDefined()
   public rankings!: string[];
 }
+
+export class ResultDataDto {
+  @ApiProperty({ 
+    description: 'The id of the nomination (uuid)',
+    required: true,
+  })
+  @IsString()
+  @IsDefined()
+  nomination_id: string;
+  
+  @ApiProperty({ 
+    description: 'The description or text of the nomination',
+    required: true,
+  })
+  @IsString()
+  @IsDefined()
+  nomination_description: string;
+  
+  @ApiProperty({ 
+    description: 'The score of the nomination',
+    required: true,
+  })
+  @Min(1)
+  @IsInt()
+  @IsDefined()
+  score: number;
+}
+
+export class AddResultsDto {
+  @ApiProperty({ description: 'The array of Results', required: true })
+  @IsArray()
+  @IsDefined()
+  public results!: ResultDataDto[];
+}

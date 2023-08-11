@@ -10,13 +10,20 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@modules/config';
-import { IOREDIS } from '@modules/types';
+import { 
+  IOREDIS, 
+  Nominations, 
+  RankingScore, 
+  Rankings, 
+  Results 
+} from '@modules/types';
 import { createRandomString } from '@modules/utils';
 import { Repository } from 'typeorm';
 import { Redis } from 'ioredis';
 import {
   AddNominationDto,
   AddRankingsDataDto,
+  AddResultsDto,
   CreatePollDto,
   InviteToPollDto,
   JoinPollDto,
@@ -43,7 +50,7 @@ export class PollsService {
     @InjectRepository(PollEntity)
     private pollRepository: Repository<PollEntity>,
   ) {
-    this.ttl = Number(`${configService.get().polls.duration}`);
+    this.ttl = configService.get().polls.duration;
   }
 
   public async create(
@@ -58,8 +65,8 @@ export class PollsService {
         participantId: '',
       };
       const signature = await this.jwtService.signAsync(data, {
-        secret: `${this.configService.get().polls.signing_secret}`,
-        expiresIn: Number(this.configService.get().polls.duration),
+        secret: this.configService.get().polls.signing_secret,
+        expiresIn: this.configService.get().polls.duration,
         subject: user.id,
       });
       newPoll.signature = signature;
@@ -340,5 +347,78 @@ export class PollsService {
       );
     }
     return await this.addRankings(id, body);
+  }
+
+  public async addResults(
+    id: string, 
+    body: AddResultsDto
+  ): Promise<GenericPollMessageResponseDto> {
+    this.logger.log(`Attempting to add results to the poll with id: ${id}`);
+
+    const pollKey = `polls:${id}`;
+    const resultsPath = '.results';
+
+    try {
+      await this.redisClient.call(
+        'JSON.SET',
+        pollKey,
+        resultsPath,
+        JSON.stringify(body.results),
+      )
+      const updatedPoll = await this.findOneUsingRedis(id);
+      return {
+        message: `Results for poll: "${updatedPoll.topic}" have been updated`,
+        data: updatedPoll,
+      }
+    } catch(error) {
+      this.logger.error(`Failed to add results to poll with id ${id}`);
+      throw new BadRequestException(error);
+    }
+  }
+
+  public async getResults(id: string): Promise<Results> {
+    const scores: RankingScore = {};
+    const poll = await this.findOneUsingRedis(id);
+
+    Object.values(poll.rankings).forEach((r) => {
+      r.forEach((id, n) => {
+        const votingPower = Math.pow(
+          (poll.votes_per_participant - 0.5 * n) / poll.votes_per_participant,
+          n + 1,
+        );
+
+        scores[id] = (scores[id] ?? 0) + votingPower;
+      })
+    })
+
+    const results = Object.entries(scores).map(([nomination_id, score]) => ({
+      nomination_id,
+      nomination_description: poll.nominations[nomination_id].description,
+      score,
+    }));
+
+    results.sort((r1, r2) => r2.score - r1.score);
+
+    return results;
+  }
+
+  public async deletePoll(id: string) {
+    this.logger.debug(`Attempting to delete the poll with id ${id}`)
+
+    const pollKey = `polls:${id}`;
+
+    try {
+      await this.redisClient.call('JSON.DEL', pollKey);
+    } catch(error) {
+      this.logger.log(`Failed to delete poll with id ${id}`);
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  public async tallyResults(id: string) {
+    const poll = await this.findOneUsingRedis(id);
+    
+    const results = await this.getResults(poll.id);
+    return await this.addResults(poll.id, { results: results })
   }
 }
