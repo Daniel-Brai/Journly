@@ -19,7 +19,7 @@ export type Rankings = {
 
 export type RankingScore = {
   [nomination_id: string]: number;
-}
+};
 
 export type ResultsData = {
   nomination_id: NominationId;

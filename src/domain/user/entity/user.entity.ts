@@ -37,7 +37,10 @@ export class UserEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 500, nullable: true })
   public profile_photo_url!: string;
 
-  @OneToMany(() => PollEntity, (poll: PollEntity) => poll.created_by)
+  @OneToMany(() => PollEntity, (poll: PollEntity) => poll.created_by, {
+    cascade: true,
+    eager: true,
+  })
   public polls!: PollEntity[];
 
   @Column({ type: 'varchar', nullable: true })

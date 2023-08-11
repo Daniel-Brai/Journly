@@ -167,23 +167,23 @@ export class AddRankingsDataDto {
 }
 
 export class ResultDataDto {
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'The id of the nomination (uuid)',
     required: true,
   })
   @IsString()
   @IsDefined()
   nomination_id: string;
-  
-  @ApiProperty({ 
+
+  @ApiProperty({
     description: 'The description or text of the nomination',
     required: true,
   })
   @IsString()
   @IsDefined()
   nomination_description: string;
-  
-  @ApiProperty({ 
+
+  @ApiProperty({
     description: 'The score of the nomination',
     required: true,
   })

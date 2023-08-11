@@ -187,7 +187,9 @@ export class PollsGateway
   @UseGuards(PollAdminGuard)
   @SubscribeMessage(POLL_CLOSED)
   async closePoll(@ConnectedSocket() client: SocketAuth) {
-    this.logger.debug(`Closing the poll with id ${client.pollId} and tallying results`);
+    this.logger.debug(
+      `Closing the poll with id ${client.pollId} and tallying results`,
+    );
 
     const poll = await this.pollsService.tallyResults(client.pollId);
 

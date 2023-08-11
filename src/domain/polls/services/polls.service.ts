@@ -10,12 +10,12 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@modules/config';
-import { 
-  IOREDIS, 
-  Nominations, 
-  RankingScore, 
-  Rankings, 
-  Results 
+import {
+  IOREDIS,
+  Nominations,
+  RankingScore,
+  Rankings,
+  Results,
 } from '@modules/types';
 import { createRandomString } from '@modules/utils';
 import { Repository } from 'typeorm';
@@ -350,8 +350,8 @@ export class PollsService {
   }
 
   public async addResults(
-    id: string, 
-    body: AddResultsDto
+    id: string,
+    body: AddResultsDto,
   ): Promise<GenericPollMessageResponseDto> {
     this.logger.log(`Attempting to add results to the poll with id: ${id}`);
 
@@ -364,13 +364,13 @@ export class PollsService {
         pollKey,
         resultsPath,
         JSON.stringify(body.results),
-      )
+      );
       const updatedPoll = await this.findOneUsingRedis(id);
       return {
         message: `Results for poll: "${updatedPoll.topic}" have been updated`,
         data: updatedPoll,
-      }
-    } catch(error) {
+      };
+    } catch (error) {
       this.logger.error(`Failed to add results to poll with id ${id}`);
       throw new BadRequestException(error);
     }
@@ -388,8 +388,8 @@ export class PollsService {
         );
 
         scores[id] = (scores[id] ?? 0) + votingPower;
-      })
-    })
+      });
+    });
 
     const results = Object.entries(scores).map(([nomination_id, score]) => ({
       nomination_id,
@@ -403,13 +403,13 @@ export class PollsService {
   }
 
   public async deletePoll(id: string) {
-    this.logger.debug(`Attempting to delete the poll with id ${id}`)
+    this.logger.debug(`Attempting to delete the poll with id ${id}`);
 
     const pollKey = `polls:${id}`;
 
     try {
       await this.redisClient.call('JSON.DEL', pollKey);
-    } catch(error) {
+    } catch (error) {
       this.logger.log(`Failed to delete poll with id ${id}`);
       throw new InternalServerErrorException(error);
     }
@@ -417,8 +417,8 @@ export class PollsService {
 
   public async tallyResults(id: string) {
     const poll = await this.findOneUsingRedis(id);
-    
+
     const results = await this.getResults(poll.id);
-    return await this.addResults(poll.id, { results: results })
+    return await this.addResults(poll.id, { results: results });
   }
 }

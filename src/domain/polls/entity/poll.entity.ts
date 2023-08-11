@@ -1,4 +1,7 @@
 import {
+  AfterLoad,
+  BeforeInsert,
+  BeforeUpdate,
   BaseEntity,
   Column,
   CreateDateColumn,
@@ -34,7 +37,7 @@ export class PollEntity extends BaseEntity {
   @Column({ type: 'jsonb', default: {} })
   public rankings!: Rankings;
 
-  @Column({ type : 'array', default: [] })
+  @Column('jsonb', { array: true, default: [] })
   public results!: Results;
 
   @ManyToOne(() => UserEntity, (user: UserEntity) => user.polls)
