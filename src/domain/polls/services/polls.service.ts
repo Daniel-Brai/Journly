@@ -58,7 +58,10 @@ export class PollsService {
     poll: CreatePollDto,
   ): Promise<PollEntity> {
     try {
-      const newPoll = this.pollRepository.create(poll);
+      const newPoll = this.pollRepository.create({
+        ...poll, 
+        created_by: user,
+      });
       const data: JwtPayload = {
         pollId: newPoll.id,
         pollName: newPoll.topic,
@@ -109,6 +112,7 @@ export class PollsService {
   public async findOneById(id: string): Promise<PollEntity> {
     const foundPoll = await this.pollRepository.findOne({
       where: { id: id },
+      relations: ['created_by'],
     });
 
     if (!foundPoll) throw new NotFoundException();
