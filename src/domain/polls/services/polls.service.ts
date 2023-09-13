@@ -59,7 +59,7 @@ export class PollsService {
   ): Promise<PollEntity> {
     try {
       const newPoll = this.pollRepository.create({
-        ...poll, 
+        ...poll,
         created_by: user,
       });
       const data: JwtPayload = {

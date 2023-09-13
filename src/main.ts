@@ -1,6 +1,6 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
 import { ConfigService } from '@modules/config';
 import { Logger } from '@modules/logger';
 import { SocketIOAdapter } from '@modules/websockets';
@@ -24,6 +24,7 @@ async function bootstrap() {
     origin: [`http://localhost:${PORT}`, `http://127.0.0.1:${PORT}`],
   });
 
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useWebSocketAdapter(new SocketIOAdapter(app, configService));
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(
