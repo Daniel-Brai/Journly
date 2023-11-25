@@ -4,4 +4,4 @@
 nginx -g "daemon off;" &
 
 # Start your Node.js app (replace with your actual Node.js startup command)
-node ../dist/main.js
+node ../apps/server/main.js
